@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 3 · Worked Example: Notes → PPTX</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --soft:#5b5b5b; --rule:#dcd6c8; --paper:#fcfbf7;
+    --accent:#8a3b2e; --code-bg:#f3efe6; --warn:#b54a2e; --ok:#2f7d54;
+  }
+  *{box-sizing:border-box}
+  body{margin:0 auto;max-width:46rem;padding:3rem 1.6rem 5rem;background:var(--paper);
+       color:var(--ink);line-height:1.6;
+       font-family:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif}
+  .kicker{font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;color:var(--accent)}
+  h1{font-size:2rem;margin:.2rem 0 .3rem;letter-spacing:-.015em;line-height:1.1}
+  .deck{color:var(--soft);font-style:italic;font-size:1.05rem;margin-bottom:2rem}
+  h2{font-size:1.22rem;margin:2.3rem 0 .5rem;border-bottom:1px solid var(--rule);padding-bottom:.3rem}
+  h3{font-size:1rem;margin:1.2rem 0 .3rem;color:var(--accent)}
+  code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.85em;
+       background:var(--code-bg);padding:.08em .35em;border-radius:3px}
+  pre{background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;
+      padding:.85rem 1.1rem;overflow:auto;font-size:.78rem;line-height:1.5}
+  pre code{background:none;padding:0}
+  .note{background:#fff;border-left:3px solid var(--accent);padding:.7rem 1rem;margin:1rem 0}
+  .warn{color:var(--warn);font-weight:600}
+  .ok{color:var(--ok);font-weight:600}
+  a{color:var(--accent)}
+  .file{font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--soft);
+        background:#fff;border:1px solid var(--rule);border-radius:4px;padding:.12em .5em;display:inline-block;margin-bottom:.3rem}
+  .stage{display:flex;gap:.6rem;align-items:baseline;margin:1.6rem 0 .3rem}
+  .stage .n{font-family:system-ui,sans-serif;font-weight:700;color:#fff;background:var(--accent);
+            border-radius:50%;width:1.6rem;height:1.6rem;display:inline-flex;align-items:center;justify-content:center;font-size:.85rem;flex:none}
+  .stage h2{margin:0;border:none;font-size:1.15rem}
+  .diff-bad{border-left:3px solid var(--warn);background:#fbeeea}
+  .diff-good{border-left:3px solid var(--ok);background:#eef7f0}
+  .askbox{background:#fffaf3;border:1px dashed var(--accent);border-radius:8px;padding:.8rem 1rem;margin:1.4rem 0;font-size:.9rem}
+  footer{margin-top:3rem;border-top:1px solid var(--rule);padding-top:1rem;color:var(--soft);font-size:.85rem}
+  kbd{font-family:"SF Mono",monospace;font-size:.8em;background:#fff;border:1px solid var(--rule);border-bottom-width:2px;border-radius:4px;padding:.05em .4em}
+</style>
+</head>
+<body>
+
+<div class="kicker">Lesson 0003</div>
+<h1>Worked example: messy notes → PPTX</h1>
+<div class="deck">One real deck, start to finish. Every artifact is a file in <code>examples/</code> you can open and run.</div>
+
+<p>We'll build an 8-slide internal pitch — <em>"Put Redis in front of our product API"</em> —
+the exact shape of deck you'd ask an LLM to make from notes + code. Follow the five files in
+<code>examples/</code> as you read.</p>
+
+<div class="stage"><span class="n">1</span><h2>The raw input</h2></div>
+<span class="file">examples/01-raw-notes.md</span>
+<p>What you'd paste into the LLM: unstructured notes, a code snippet, plus the meta-facts
+that decide everything — <strong>audience, time slot, and the goal</strong> ("backend team, 10 min,
+get buy-in for a spike"). Always include those; they're your spec.</p>
+
+<div class="stage"><span class="n">2</span><h2>Lock the outline — before any Marp</h2></div>
+<span class="file">examples/02-outline.md</span>
+<p>Prompt used:</p>
+<pre><code>Draft a slide-by-slide OUTLINE only — no Markdown. One line each:
+title + one-sentence purpose. ~8 slides, arc hook→problem→solution→proof→ask.</code></pre>
+<p>You get plain text you can scan in 10 seconds and fix cheaply:</p>
+<pre><code>1. Title + the ask
+2. The pain — p99 ~800ms, DB hammered
+3. The insight — 80/20 repeat reads
+4. The plan — cache-aside
+5. The code — get_product snippet
+6. The risks
+7. The mitigations
+8. Payoff + ask — approve a spike</code></pre>
+<p class="note"><span class="warn">This is the step that saves you.</span> If the story is wrong,
+you fix one line here — not 8 broken slides later. Approve it explicitly before moving on.</p>
+
+<div class="stage"><span class="n">3</span><h2>Generate the Marp Markdown</h2></div>
+<span class="file">examples/deck.md</span>
+<p>Now — and only now — you ask for syntax, handing over the <a href="../reference/0002-llm-deck-prompt.html">rules block</a>.
+The front-matter sets the whole deck:</p>
+<pre><code>---
+marp: true
+theme: gaia
+size: 16:9
+paginate: true
+---</code></pre>
+<p>Title slide uses <strong>spot</strong> directives (note the underscores) so they touch only slide 1:</p>
+<pre><code>&lt;!-- _class: lead --&gt;
+&lt;!-- _paginate: skip --&gt;
+
+# Putting Redis in Front of Our Product API</code></pre>
+<p>Open <code>examples/deck.md</code> to read all 8 slides — code fence, blockquote, and a
+per-slide <code>_footer</code> included.</p>
+
+<div class="stage"><span class="n">4</span><h2>Catch what the weak model got wrong</h2></div>
+<p>A low-reasoning model's <em>first</em> draft of the title slide typically looks like this — and
+it's subtly broken in two ways:</p>
+<pre class="diff-bad"><code>---
+marp: true
+theme: corporate          ← invented theme; silently ignored
+---
+
+&lt;!-- class: lead --&gt;       ← no underscore: leaks to EVERY slide
+
+# Putting Redis in Front of Our Product API</code></pre>
+<p>Your review catches both from the cheat-sheet checklist. The fix:</p>
+<pre class="diff-good"><code>---
+marp: true
+theme: gaia               ← real theme
+---
+
+&lt;!-- _class: lead --&gt;      ← underscore: this slide only
+
+# Putting Redis in Front of Our Product API</code></pre>
+<p class="note"><span class="ok">This is the whole skill.</span> You didn't need to write Marp —
+you needed to <em>spot</em> the invalid theme and the missing underscore, then tell the model
+exactly what to fix. That's your job as editor-in-chief.</p>
+
+<div class="stage"><span class="n">5</span><h2>Preview, then export</h2></div>
+<p>See it before you trust it. Fastest paths:</p>
+<pre><code># live preview window, auto-reload on save
+npx @marp-team/marp-cli@latest -p -w examples/deck.md
+
+# or paste the file into https://web.marp.app/</code></pre>
+<p>Happy? Export to PowerPoint:</p>
+<pre><code># PPTX as images — pixel-perfect, keeps notes, NOT editable text
+npx @marp-team/marp-cli@latest examples/deck.md --pptx</code></pre>
+<p class="note"><strong>Your setup:</strong> you have Node ✓ but not LibreOffice, so the editable
+path (<code>--pptx-editable</code>) is off the table for now — default <code>--pptx</code> (images)
+is your route. PPTX/PDF/PNG export also needs Chrome, Edge, or Firefox installed (Marp renders through it).
+<br><br><span class="warn">Heads-up on your local setup:</span> your <code>package.json</code> has only
+<code>@marp-team/marpit</code> (the engine — no themes, no export). The <code>npx … marp-cli</code>
+commands above sidestep that. If you want a local install: <code>npm i -D @marp-team/marp-cli</code>.</p>
+
+<div class="stage"><span class="n">6</span><h2>The loop, if a slide is off</h2></div>
+<p>Don't regenerate the whole deck. Point at one slide, name the bug:</p>
+<pre><code>Slide 5's code overflows the slide. Shorten the comments and drop blank
+lines so it fits; return the full file.</code></pre>
+<p>Re-preview. Repeat until clean. <strong>That's the entire lifecycle.</strong></p>
+
+<div class="askbox">
+<strong>Want to actually run it?</strong> Open <code>examples/deck.md</code>, then run the preview
+command above. If anything errors (browser not found, etc.), tell me the message and I'll get you unstuck.
+I can also generate a second deck from <em>your</em> real notes so you practice the review step on fresh output.
+</div>
+
+<h2>Recap — the five files</h2>
+<pre><code>examples/01-raw-notes.md   what you hand the LLM (notes + code + spec)
+examples/02-outline.md     the locked plain-text storyboard (approve this)
+examples/deck.md           the generated Marp Markdown (review this)
+→ preview                  npx … marp-cli -p -w examples/deck.md
+→ examples/deck.pptx        npx … marp-cli examples/deck.md --pptx</code></pre>
+
+<h2>Read (primary source)</h2>
+<p><a href="https://marpit.marp.app/markdown"><strong>Marpit · Markdown</strong></a> — re-skim now that
+you've seen a full deck; it'll read much faster.</p>
+
+<footer>
+Lesson 0003 · ties to <code>MISSION.md</code>. Builds on
+<a href="0001-marp-mental-model.html">0001</a> + <a href="0002-deck-lifecycle.html">0002</a>.<br>
+Next: run it for real, or a directive-scopes drill to make the underscore rule automatic.
+</footer>
+</body>
+</html>
