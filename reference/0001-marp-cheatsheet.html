@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marp Cheat Sheet</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --soft:#5b5b5b; --rule:#dcd6c8; --paper:#fcfbf7;
+    --accent:#8a3b2e; --code-bg:#f3efe6; --warn:#b54a2e; --ok:#3a6b4f;
+  }
+  *{box-sizing:border-box}
+  html{font-size:16px}
+  body{
+    margin:0 auto; max-width:50rem; padding:3rem 1.6rem 5rem;
+    background:var(--paper); color:var(--ink);
+    font-family:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;
+    line-height:1.5;
+  }
+  header.doc{border-bottom:2px solid var(--ink);padding-bottom:.6rem;margin-bottom:1.6rem}
+  h1{font-size:1.9rem;margin:0;letter-spacing:-.01em}
+  .sub{color:var(--soft);font-style:italic;margin-top:.2rem}
+  h2{font-size:1.15rem;margin:2.2rem 0 .5rem;color:var(--accent);
+     border-bottom:1px solid var(--rule);padding-bottom:.25rem}
+  h3{font-size:.95rem;margin:1.1rem 0 .3rem;letter-spacing:.02em;text-transform:uppercase;color:var(--soft)}
+  code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.82em;
+       background:var(--code-bg);padding:.08em .35em;border-radius:3px}
+  pre{background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;
+      padding:.8rem 1rem;overflow:auto;font-size:.8rem;line-height:1.45;margin:.5rem 0}
+  pre code{background:none;padding:0;font-size:1em}
+  table{border-collapse:collapse;width:100%;margin:.6rem 0;font-size:.86rem}
+  th,td{text-align:left;padding:.4rem .55rem;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--soft)}
+  td code{white-space:nowrap}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:0 2rem}
+  .pill{display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;
+        padding:.1em .5em;border-radius:99px;border:1px solid var(--rule);color:var(--soft);margin-left:.4rem}
+  .warn{color:var(--warn);font-weight:600}
+  .ok{color:var(--ok);font-weight:600}
+  .note{background:#fff;border-left:3px solid var(--accent);padding:.6rem .9rem;margin:.8rem 0;font-size:.88rem}
+  footer{margin-top:3rem;border-top:1px solid var(--rule);padding-top:.8rem;color:var(--soft);font-size:.8rem}
+  a{color:var(--accent)}
+  @media print{body{background:#fff;font-size:11pt;max-width:none}.note{background:#f6f6f6}}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="doc">
+  <h1>Marp Cheat Sheet</h1>
+  <div class="sub">Markdown → slides. The reference you keep open while reviewing an LLM's output.</div>
+</header>
+
+<h2>1 · Minimal valid deck</h2>
+<pre><code>---
+marp: true
+theme: default
+paginate: true
+---
+
+# Title slide
+
+Body text here.
+
+---
+
+## Second slide
+
+- bullet
+- bullet</code></pre>
+<div class="note">
+<span class="warn">#1 rule:</span> the file MUST start with front-matter containing
+<code>marp: true</code>. Without it, Marp tools treat the file as plain Markdown — no slides.
+This is the single most common thing an LLM forgets.
+</div>
+
+<h2>2 · Slide separation</h2>
+<p>A horizontal rule splits slides: <code>---</code> (also <code>***</code>, <code>___</code>).
+The <em>first two</em> <code>---</code> rulers delimit the YAML front-matter; every
+<code>---</code> after that is a slide break.</p>
+
+<h2>3 · Directive scopes <span class="pill">most confused</span></h2>
+<table>
+<tr><th>Scope</th><th>Written as</th><th>Applies to</th></tr>
+<tr><td>Global</td><td>In front-matter, or <code>&lt;!-- theme: gaia --&gt;</code></td><td>Whole deck</td></tr>
+<tr><td>Local</td><td><code>&lt;!-- paginate: true --&gt;</code></td><td>This slide <strong>and all after</strong></td></tr>
+<tr><td>Spot (underscore)</td><td><code>&lt;!-- _class: lead --&gt;</code></td><td><strong>This one slide only</strong></td></tr>
+</table>
+<div class="note">The leading <code>_</code> = "this slide only." <span class="warn">LLMs constantly
+drop the underscore</span> (leaking a style to every later slide) or add one where it
+shouldn't be. If a style "bleeds" down the deck, look for a missing <code>_</code>.</div>
+
+<h2>4 · Directive reference</h2>
+<div class="grid">
+<div>
+<h3>Global (deck-wide)</h3>
+<table>
+<tr><td><code>marp</code></td><td>must be <code>true</code></td></tr>
+<tr><td><code>theme</code></td><td>default · gaia · uncover</td></tr>
+<tr><td><code>size</code></td><td><code>16:9</code> or <code>4:3</code></td></tr>
+<tr><td><code>math</code></td><td><code>katex</code> / <code>mathjax</code></td></tr>
+<tr><td><code>style</code></td><td>inline CSS override</td></tr>
+<tr><td><code>headingDivider</code></td><td>auto-split on heading level</td></tr>
+</table>
+</div>
+<div>
+<h3>Local / spot</h3>
+<table>
+<tr><td><code>paginate</code></td><td>true·false·hold·skip</td></tr>
+<tr><td><code>header</code></td><td>top text</td></tr>
+<tr><td><code>footer</code></td><td>bottom text</td></tr>
+<tr><td><code>class</code></td><td>e.g. <code>lead</code>, <code>invert</code></td></tr>
+<tr><td><code>backgroundColor</code></td><td>CSS color</td></tr>
+<tr><td><code>color</code></td><td>text color</td></tr>
+</table>
+</div>
+</div>
+<p style="font-size:.85rem"><strong>Themes are: <code>default</code>, <code>gaia</code>, <code>uncover</code>.</strong>
+If an LLM writes <code>theme: gaudy</code> or any other name → wrong, it'll silently fall back.</p>
+
+<h2>5 · Images &amp; backgrounds</h2>
+<h3>Resize a normal image</h3>
+<pre><code>![w:300](cat.jpg)          # width 300px
+![w:200 h:150](cat.jpg)    # both
+![width:50%](cat.jpg)</code></pre>
+<h3>Background images (the <code>bg</code> keyword)</h3>
+<pre><code>![bg](photo.jpg)              # full-slide background
+![bg cover](photo.jpg)        # fill (default)
+![bg contain](photo.jpg)      # fit inside, no crop  (alias: fit)
+![bg left](photo.jpg)         # image on left half, text on right
+![bg right:40%](photo.jpg)    # right 40%, text on remaining 60%
+![bg left](a.jpg)
+![bg right](b.jpg)            # two-up split
+
+![bg blur:4px brightness:.7](photo.jpg)   # filters</code></pre>
+<div class="note"><span class="warn">Watch for:</span> an LLM using plain <code>![](bg.jpg)</code>
+without the <code>bg</code> keyword (gives a tiny inline image, not a background), or mixing
+up <code>cover</code> (crops to fill) vs <code>contain</code>/<code>fit</code> (letterboxes).</div>
+
+<h2>6 · Marp-Core extras</h2>
+<table>
+<tr><td>Fit heading</td><td><code># &lt;!-- fit --&gt; Big Title</code> auto-scales to slide width</td></tr>
+<tr><td>Math</td><td><code>$E=mc^2$</code> inline · <code>$$ ... $$</code> block (needs <code>math:</code> directive)</td></tr>
+<tr><td>Emoji</td><td><code>:smile:</code> → 😄</td></tr>
+<tr><td>Columns</td><td>No native syntax — done via <code>style</code> CSS or HTML <code>&lt;div&gt;</code>. LLMs often hallucinate a column directive that doesn't exist.</td></tr>
+</table>
+
+<h2>7 · Export (Marp CLI)</h2>
+<pre><code>npx @marp-team/marp-cli@latest deck.md            # → deck.html
+marp deck.md -o out.pdf                           # PDF  (needs Chrome/Edge/Firefox)
+marp deck.md --pptx                               # PowerPoint
+marp deck.md --images png                         # one PNG per slide
+marp -w deck.md                                   # watch mode
+marp -p deck.md                                   # preview window</code></pre>
+<p style="font-size:.85rem">Or just paste markdown into the no-install web editor:
+<a href="https://web.marp.app/">web.marp.app</a> — best feedback loop.</p>
+
+<h2>8 · LLM failure-mode checklist</h2>
+<table>
+<tr><th>Symptom</th><th>Likely cause / fix</th></tr>
+<tr><td>Renders as one long page, no slides</td><td>Missing <code>marp: true</code> front-matter</td></tr>
+<tr><td>Style bleeds to all later slides</td><td>Used <code>class:</code> instead of <code>_class:</code> (missing underscore)</td></tr>
+<tr><td>Theme ignored</td><td>Invalid theme name — must be default/gaia/uncover</td></tr>
+<tr><td>Background is a tiny image</td><td>Missing <code>bg</code> keyword in <code>![bg](...)</code></td></tr>
+<tr><td>Image cropped weirdly</td><td><code>cover</code> vs <code>contain</code>/<code>fit</code> mixup</td></tr>
+<tr><td>Made-up directive (e.g. <code>columns:</code>, <code>layout:</code>)</td><td>Hallucination — Marp has no such directive; use CSS via <code>style</code></td></tr>
+<tr><td>Comment shows on slide</td><td>HTML comment used for prose, but Marp comments are <em>directives</em>; for notes use presenter notes</td></tr>
+<tr><td>Slide overflows / text cut off</td><td>Too much content per slide; split it. Marp does not auto-paginate overflow.</td></tr>
+</table>
+
+<footer>
+Reference 0001 · grounded in official Marpit / Marp-Core / Marp-CLI docs (2026-06-15).
+See <code>RESOURCES.md</code> for source links. Glossary terms: <em>front-matter, directive,
+scope, spot directive, bg keyword, theme</em>.
+</footer>
+</body>
+</html>

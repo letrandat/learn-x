@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 1 · The Marp Mental Model</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --soft:#5b5b5b; --rule:#dcd6c8; --paper:#fcfbf7;
+    --accent:#8a3b2e; --code-bg:#f3efe6; --warn:#b54a2e; --ok:#2f7d54;
+  }
+  *{box-sizing:border-box}
+  body{margin:0 auto;max-width:46rem;padding:3rem 1.6rem 5rem;background:var(--paper);
+       color:var(--ink);line-height:1.6;
+       font-family:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif}
+  .kicker{font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;color:var(--accent)}
+  h1{font-size:2.05rem;margin:.2rem 0 .3rem;letter-spacing:-.015em;line-height:1.1}
+  .deck{color:var(--soft);font-style:italic;font-size:1.05rem;margin-bottom:2rem}
+  h2{font-size:1.25rem;margin:2.4rem 0 .5rem;border-bottom:1px solid var(--rule);padding-bottom:.3rem}
+  code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.85em;
+       background:var(--code-bg);padding:.08em .35em;border-radius:3px}
+  pre{background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;
+      padding:.85rem 1.1rem;overflow:auto;font-size:.82rem;line-height:1.5}
+  pre code{background:none;padding:0}
+  .layers{list-style:none;padding:0;margin:1rem 0}
+  .layers li{padding:.7rem 1rem;border:1px solid var(--rule);border-radius:6px;margin:.45rem 0;background:#fff}
+  .layers b{color:var(--accent)}
+  .note{background:#fff;border-left:3px solid var(--accent);padding:.7rem 1rem;margin:1rem 0}
+  .warn{color:var(--warn);font-weight:600}
+  a{color:var(--accent)}
+
+  /* Quiz */
+  .quiz{background:#fff;border:1px solid var(--rule);border-radius:10px;padding:1.2rem 1.3rem;margin:1.1rem 0}
+  .quiz h3{margin:.1rem 0 .5rem;font-size:1.02rem}
+  .opt{display:block;width:100%;text-align:left;font:inherit;font-size:.92rem;
+       background:var(--paper);border:1px solid var(--rule);border-radius:6px;
+       padding:.55rem .8rem;margin:.4rem 0;cursor:pointer;transition:.15s}
+  .opt:hover{border-color:var(--accent)}
+  .opt.correct{border-color:var(--ok);background:#eef7f0}
+  .opt.wrong{border-color:var(--warn);background:#fbeeea}
+  .fb{font-size:.88rem;margin-top:.6rem;min-height:1.2rem;color:var(--soft)}
+  .fb.show{color:var(--ink)}
+  .score{font-weight:600}
+  footer{margin-top:3rem;border-top:1px solid var(--rule);padding-top:1rem;color:var(--soft);font-size:.85rem}
+  .askbox{background:#fffaf3;border:1px dashed var(--accent);border-radius:8px;padding:.8rem 1rem;margin:1.4rem 0;font-size:.9rem}
+</style>
+</head>
+<body>
+
+<div class="kicker">Lesson 0001</div>
+<h1>The Marp Mental Model</h1>
+<div class="deck">Just enough to read an LLM's slide deck and know if it's any good.</div>
+
+<p><strong>Marp = Markdown → slides.</strong> You write a normal-ish Markdown file; Marp
+turns each chunk into a slide. Your job isn't to author it — it's to <em>review</em> what
+your LLM produces. To do that you need three things: the layer model, the anatomy of a
+deck, and a nose for the handful of mistakes a weak model always makes.</p>
+
+<h2>1 · Three layers (so you know what to blame)</h2>
+<ul class="layers">
+  <li><b>Marpit</b> — the engine. Defines the core syntax: slide breaks, <em>directives</em>, image/background syntax. <a href="https://marpit.marp.app/">marpit.marp.app</a></li>
+  <li><b>Marp Core</b> — adds the nice stuff: built-in themes (<code>default</code>, <code>gaia</code>, <code>uncover</code>), math, emoji, auto-fit headings.</li>
+  <li><b>Marp CLI / VS Code</b> — the tools that turn your <code>.md</code> into HTML / PDF / PPTX, or preview it live.</li>
+</ul>
+<p class="note">When something's wrong, this tells you <em>which doc to paste at the LLM</em>:
+syntax/directive bug → Marpit docs; theme/math bug → Marp Core; export bug → Marp CLI.</p>
+
+<h2>2 · Anatomy of a deck</h2>
+<pre><code>---
+marp: true          ← REQUIRED. Turns the file into a deck.
+theme: gaia
+paginate: true
+---
+
+# Slide one
+
+Some words.
+
+---                 ← this ruler = new slide
+
+&lt;!-- _class: lead --&gt;   ← directive, THIS slide only (note the _)
+
+## Slide two</code></pre>
+<p>Two things do all the structural work:</p>
+<ul>
+  <li><strong>Front-matter</strong> (the top <code>--- ... ---</code> block) — deck-wide settings. <span class="warn">Must contain <code>marp: true</code>.</span></li>
+  <li><strong>The <code>---</code> ruler</strong> — every one after the front-matter starts a new slide.</li>
+</ul>
+
+<h2>3 · Directives have a <em>scope</em> — this is what LLMs break</h2>
+<p>A directive is a setting written as an HTML comment (or in front-matter). The scope
+depends on how it's written:</p>
+<pre><code>&lt;!-- theme: gaia --&gt;        global — whole deck
+&lt;!-- paginate: true --&gt;     local  — this slide AND every slide after
+&lt;!-- _paginate: false --&gt;   spot   — this ONE slide only  (leading _)</code></pre>
+<p class="note">The leading <span class="warn"><code>_</code> underscore</span> means
+"<strong>this slide only</strong>." Forget it, and a one-slide style leaks across the
+whole deck. This is the most common Marp bug a low-reasoning model makes. When you see a
+style "stuck on" later slides — hunt for a missing underscore.</p>
+
+<h2>4 · Spot the bug <span style="font-size:.8rem;color:var(--soft)">— recall practice</span></h2>
+<p>Read each snippet. Pick what's wrong. Immediate feedback. (No peeking at the cheat sheet first.)</p>
+
+<div class="quiz" id="q1">
+  <h3>Q1. This whole file renders as plain text, no slides. Why?</h3>
+<pre><code>---
+theme: gaia
+paginate: true
+---
+# My Talk</code></pre>
+  <button class="opt" data-c="0">The theme <code>gaia</code> doesn't exist</button>
+  <button class="opt" data-c="1">Front-matter is missing <code>marp: true</code></button>
+  <button class="opt" data-c="0">You can't use <code>paginate</code> in front-matter</button>
+  <div class="fb"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <h3>Q2. The author wanted a big background image only on the title slide. What's broken?</h3>
+<pre><code>![background](hero.jpg)
+# Welcome</code></pre>
+  <button class="opt" data-c="1">Should be <code>![bg](hero.jpg)</code> — the keyword is <code>bg</code></button>
+  <button class="opt" data-c="0">Background images must go in front-matter</button>
+  <button class="opt" data-c="0">Images can't appear above a heading</button>
+  <div class="fb"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <h3>Q3. They wanted a dark background on <em>just slide 2</em>, but slides 3, 4, 5 are dark too. Fix?</h3>
+<pre><code>&lt;!-- backgroundColor: black --&gt;
+## Slide 2</code></pre>
+  <button class="opt" data-c="1">Add the underscore: <code>&lt;!-- _backgroundColor: black --&gt;</code></button>
+  <button class="opt" data-c="0">Move it into the front-matter block</button>
+  <button class="opt" data-c="0">Use <code>theme: black</code> instead</button>
+  <div class="fb"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <h3>Q4. The LLM wrote this to make two columns. Will it work?</h3>
+<pre><code>&lt;!-- columns: 2 --&gt;
+- left stuff
+- right stuff</code></pre>
+  <button class="opt" data-c="1">No — there's no <code>columns</code> directive; it's hallucinated</button>
+  <button class="opt" data-c="0">Yes, that's the standard Marp column syntax</button>
+  <button class="opt" data-c="0">Yes, but only with <code>theme: gaia</code></button>
+  <div class="fb"></div>
+</div>
+
+<p class="score" id="score" style="text-align:center"></p>
+
+<div class="askbox">
+  <strong>I'm your teacher — ask me anything.</strong> Confused why <code>cover</code> crops
+  but <code>contain</code> doesn't? Want a drill on directive scopes, or to see how to fake
+  columns properly? Just say so and I'll build the next lesson.
+</div>
+
+<h2>Do this next (5 min)</h2>
+<ol>
+  <li>Open the <a href="../reference/0001-marp-cheatsheet.html">Marp Cheat Sheet</a> — keep it beside you when reviewing decks.</li>
+  <li>Go to <a href="https://web.marp.app/">web.marp.app</a>, paste the deck from §2, and watch it become slides. Then delete <code>marp: true</code> and see it break. <em>That</em> is the failure you'll catch most often.</li>
+</ol>
+
+<h2>Read / watch (primary source)</h2>
+<p>Most trustworthy single page: <a href="https://marpit.marp.app/directives"><strong>Marpit · Directives</strong></a>.
+It's the one to paste at your LLM when scopes go wrong.</p>
+
+<footer>
+Lesson 0001 of the Marp track · ties to <code>MISSION.md</code> (direct &amp; correct an LLM's decks).<br>
+Next up: directive-scope deep dive, or images &amp; backgrounds — your call.
+</footer>
+
+<script>
+  let answered = 0, correct = 0;
+  document.querySelectorAll('.quiz').forEach(q=>{
+    const opts=q.querySelectorAll('.opt'); const fb=q.querySelector('.fb');
+    let done=false;
+    opts.forEach(o=>o.addEventListener('click',()=>{
+      if(done)return; done=true; answered++;
+      const good=o.dataset.c==="1";
+      if(good){o.classList.add('correct');correct++;fb.textContent="✓ Correct.";}
+      else{o.classList.add('wrong');fb.textContent="✗ Not quite — the right answer is highlighted.";
+           opts.forEach(x=>{if(x.dataset.c==="1")x.classList.add('correct')});}
+      fb.classList.add('show');
+      if(answered===4){
+        document.getElementById('score').textContent=`Score: ${correct} / 4 — `+
+          (correct===4?"you can already spot the big four. 🎯":"review the cheat sheet, then re-test.");
+      }
+    }));
+  });
+</script>
+</body>
+</html>
