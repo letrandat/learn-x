@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 2 · MD → PPTX Lifecycle</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --soft:#5b5b5b; --rule:#dcd6c8; --paper:#fcfbf7;
+    --accent:#8a3b2e; --code-bg:#f3efe6; --warn:#b54a2e; --ok:#2f7d54;
+  }
+  *{box-sizing:border-box}
+  body{margin:0 auto;max-width:46rem;padding:3rem 1.6rem 5rem;background:var(--paper);
+       color:var(--ink);line-height:1.6;
+       font-family:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif}
+  .kicker{font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;color:var(--accent)}
+  h1{font-size:2.05rem;margin:.2rem 0 .3rem;letter-spacing:-.015em;line-height:1.1}
+  .deck{color:var(--soft);font-style:italic;font-size:1.05rem;margin-bottom:2rem}
+  h2{font-size:1.25rem;margin:2.4rem 0 .5rem;border-bottom:1px solid var(--rule);padding-bottom:.3rem}
+  h3{font-size:1rem;margin:1.3rem 0 .3rem;color:var(--accent)}
+  code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.85em;
+       background:var(--code-bg);padding:.08em .35em;border-radius:3px}
+  pre{background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;
+      padding:.85rem 1.1rem;overflow:auto;font-size:.8rem;line-height:1.5}
+  pre code{background:none;padding:0}
+  .note{background:#fff;border-left:3px solid var(--accent);padding:.7rem 1rem;margin:1rem 0}
+  .warn{color:var(--warn);font-weight:600}
+  a{color:var(--accent)}
+  table{border-collapse:collapse;width:100%;margin:.6rem 0;font-size:.86rem}
+  th,td{text-align:left;padding:.45rem .55rem;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--soft)}
+
+  /* pipeline */
+  .pipe{counter-reset:step;list-style:none;padding:0;margin:1.2rem 0}
+  .pipe>li{position:relative;border:1px solid var(--rule);background:#fff;border-radius:8px;
+           padding:.85rem 1rem .85rem 3.4rem;margin:.55rem 0}
+  .pipe>li::before{counter-increment:step;content:counter(step);
+     position:absolute;left:.85rem;top:.85rem;width:1.7rem;height:1.7rem;border-radius:50%;
+     background:var(--accent);color:#fff;font-weight:700;font-size:.9rem;
+     display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif}
+  .pipe b{display:block;margin-bottom:.15rem}
+  .pipe .who{font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--soft)}
+  .askbox{background:#fffaf3;border:1px dashed var(--accent);border-radius:8px;padding:.8rem 1rem;margin:1.4rem 0;font-size:.9rem}
+  footer{margin-top:3rem;border-top:1px solid var(--rule);padding-top:1rem;color:var(--soft);font-size:.85rem}
+  .your{background:#eef3ee;border:1px solid #cfe0d3;border-radius:8px;padding:.7rem 1rem;margin:1rem 0;font-size:.92rem}
+</style>
+</head>
+<body>
+
+<div class="kicker">Lesson 0002</div>
+<h1>From Markdown to PPTX: the real lifecycle</h1>
+<div class="deck">Your instinct was close. Here's the corrected, full pipeline — and how to drive the LLM through each stage.</div>
+
+<h2>Your mental model, graded</h2>
+<div class="your">
+"Gather context with the LLM → generate a Marp <code>.md</code> → preview in browser → export PPTX."
+<br><br>
+<strong>~80% right.</strong> Two missing pieces that matter most <em>because your model is weak</em>:
+<ul style="margin:.4rem 0 0">
+  <li><span class="warn">A locked outline before any Markdown.</span> Never let a low-reasoning model do "decide the story" and "write Marp syntax" in one shot — it'll botch both.</li>
+  <li><span class="warn">PPTX is rasterized images by default</span> — each slide is a picture, not editable text. This changes how you plan the whole thing.</li>
+</ul>
+</div>
+
+<h2>The full lifecycle</h2>
+<ol class="pipe">
+  <li>
+    <span class="who">You — before touching the LLM</span>
+    <b>Set the spec</b>
+    Audience, length (~N slides), goal, theme (<code>default/gaia/uncover</code>), aspect (<code>16:9</code>), and <em>editable-or-image PPTX?</em> (see §PPTX). Write these down — they become constraints you hand the model.
+  </li>
+  <li>
+    <span class="who">You + LLM — conversation</span>
+    <b>Gather context</b>
+    Feed your <code>.md</code> notes + code. Ask the LLM to <em>summarize and ask clarifying questions</em>. Don't ask for slides yet.
+  </li>
+  <li>
+    <span class="who">LLM — plain text, no Marp yet</span>
+    <b>Agree the outline / storyboard</b>
+    One line per slide: title + 1-sentence purpose. <strong>You review and lock this.</strong> Cheap to fix here, expensive later. This is the step you were missing.
+  </li>
+  <li>
+    <span class="who">LLM — now syntax</span>
+    <b>Generate Marp Markdown</b>
+    Give it the rules (front-matter with <code>marp: true</code>, one slide per <code>---</code>, valid theme, scope underscores). Use the prompt template → <a href="../reference/0002-llm-deck-prompt.html">reference 0002</a>.
+  </li>
+  <li>
+    <span class="who">You — eyeball</span>
+    <b>Preview &amp; verify</b>
+    Paste into <a href="https://web.marp.app/">web.marp.app</a>, or <code>marp -p -w deck.md</code>, or VS Code preview. Run the <a href="../reference/0001-marp-cheatsheet.html#">failure-mode checklist</a>. Catch overflow, leaked styles, broken images.
+  </li>
+  <li>
+    <span class="who">You + LLM — iterate</span>
+    <b>Fix specific slides</b>
+    Point at the broken slide, name the bug ("style leaking — add the <code>_</code>"). Tight loop. Re-preview.
+  </li>
+  <li>
+    <span class="who">You — CLI</span>
+    <b>Export PPTX</b>
+    <code>marp deck.md --pptx</code> (needs Chrome/Edge/Firefox installed). See §PPTX for the editable trap.
+  </li>
+</ol>
+<p class="note">The hinge is <strong>steps 3 vs 4</strong>: outline (thinking) is separated from
+Marp syntax (formatting). A weak model that conflates them produces a confident, broken deck.</p>
+
+<h2>How to prompt at each stage</h2>
+<p>Don't write one giant prompt. Drive it in turns — each with a narrow job:</p>
+<pre><code>Stage 2  "Here are my notes and code. Summarize the key points.
+          Ask me up to 5 questions before we plan slides."
+
+Stage 3  "Draft a slide-by-slide OUTLINE only. One line each:
+          slide title + one-sentence purpose. ~12 slides.
+          No Markdown yet."
+
+Stage 4  "Now convert THIS outline to Marp Markdown.
+          Rules: start with front-matter (marp: true, theme: gaia,
+          paginate: true). One slide per ---. Use _class: lead only
+          on the title slide. No invented directives. Keep each slide
+          under ~6 bullets so nothing overflows."
+
+Stage 6  "Slide 7's dark background leaks onto 8-10. Fix by making it
+          a spot directive (_backgroundColor)."</code></pre>
+<p>The full copy-paste rules block lives in <a href="../reference/0002-llm-deck-prompt.html">reference 0002</a> — paste it once and the model has the guardrails.</p>
+
+<h2 id="pptx">The PPTX trap (read this twice)</h2>
+<p><code>marp deck.md --pptx</code> does <strong>not</strong> give you editable PowerPoint text.
+Each slide is exported as a <em>rendered background image</em> — you can't click into a bullet
+and edit it. <a href="https://github.com/orgs/marp-team/discussions/82">[marp-team discussion #82]</a></p>
+<table>
+<tr><th>Command</th><th>You get</th><th>Cost</th></tr>
+<tr><td><code>--pptx</code></td><td>Slides as <strong>images</strong>. Pixel-perfect to your Marp design. Presenter notes preserved.</td><td>Not editable in PowerPoint</td></tr>
+<tr><td><code>--pptx --pptx-editable</code></td><td><strong>Editable</strong> text/shapes</td><td>Experimental. Needs <strong>LibreOffice</strong> installed. Lower visual fidelity; complex CSS may break; <span class="warn">no presenter notes</span></td></tr>
+</table>
+<div class="note"><strong>Decision rule (set in step 1):</strong> if the deck just needs to
+<em>present</em> and look exactly like your Marp design → default <code>--pptx</code>. If a
+colleague must <em>edit text in PowerPoint</em> afterward → <code>--pptx-editable</code> + accept
+the fidelity hit, or reconsider whether Marp is the right tool for that handoff.</div>
+<p style="font-size:.85rem"><span class="warn">Both need a browser</span> (Chrome/Edge/Firefox) installed — Marp uses it to render. Same for PDF and PNG export.</p>
+
+<h2>One-line recap</h2>
+<p><strong>Spec → context → <span class="warn">locked outline</span> → Marp md → preview/verify → iterate → <code>--pptx</code> (images, unless you opt into editable).</strong></p>
+
+<div class="askbox">
+<strong>Ask me anything.</strong> Want me to generate a real example deck end-to-end from a
+sample of your notes? Or a lesson on speaker notes, or making the <code>--pptx-editable</code>
+path actually work on your Mac? Say the word.
+</div>
+
+<h2>Do this next (10 min)</h2>
+<ol>
+  <li>Open <a href="../reference/0002-llm-deck-prompt.html">reference 0002 — the prompt template</a>. Skim it; it's your reusable harness.</li>
+  <li>Take any small <code>.md</code> you have. Run stages 2→4 with your LLM. Preview at <a href="https://web.marp.app/">web.marp.app</a>.</li>
+  <li>If you have Node: <code>npx @marp-team/marp-cli@latest deck.md --pptx</code>. Open the result — notice you can't edit the text. That's the trap, now internalized.</li>
+</ol>
+
+<h2>Read (primary source)</h2>
+<p><a href="https://github.com/marp-team/marp-cli#convert-to-powerpoint-document-pptx"><strong>Marp CLI · PPTX section</strong></a> — the authoritative word on <code>--pptx</code> / <code>--pptx-editable</code>.</p>
+
+<footer>
+Lesson 0002 · ties to <code>MISSION.md</code> (direct &amp; correct an LLM's decks).<br>
+Builds on <a href="0001-marp-mental-model.html">Lesson 0001</a>. Next: speaker notes &amp; the editable-PPTX path, or a full worked example.
+</footer>
+</body>
+</html>

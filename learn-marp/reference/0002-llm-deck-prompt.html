@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference · LLM Deck-Generation Prompt Kit</title>
+<style>
+  :root{--ink:#1a1a1a;--soft:#5b5b5b;--rule:#dcd6c8;--paper:#fcfbf7;--accent:#8a3b2e;--code-bg:#f3efe6;--warn:#b54a2e}
+  *{box-sizing:border-box}
+  body{margin:0 auto;max-width:48rem;padding:3rem 1.6rem 5rem;background:var(--paper);color:var(--ink);
+       line-height:1.55;font-family:"Iowan Old Style",Palatino,Georgia,serif}
+  header.doc{border-bottom:2px solid var(--ink);padding-bottom:.6rem;margin-bottom:1.4rem}
+  h1{font-size:1.8rem;margin:0}
+  .sub{color:var(--soft);font-style:italic;margin-top:.2rem}
+  h2{font-size:1.12rem;margin:2rem 0 .4rem;color:var(--accent);border-bottom:1px solid var(--rule);padding-bottom:.25rem}
+  code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.83em;background:var(--code-bg);padding:.08em .35em;border-radius:3px}
+  pre{background:#fff;border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:6px;
+      padding:.85rem 1rem;overflow:auto;font-size:.8rem;line-height:1.5;margin:.5rem 0}
+  pre code{background:none;padding:0}
+  .tag{display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:#fff;
+       background:var(--accent);border-radius:4px;padding:.12em .5em;margin-bottom:.3rem}
+  .note{background:#fff;border-left:3px solid var(--accent);padding:.6rem .9rem;margin:.7rem 0;font-size:.9rem}
+  a{color:var(--accent)}
+  footer{margin-top:3rem;border-top:1px solid var(--rule);padding-top:.8rem;color:var(--soft);font-size:.8rem}
+  @media print{body{background:#fff;font-size:11pt;max-width:none}pre{background:#f6f6f6}}
+</style>
+</head>
+<body>
+<header class="doc">
+  <h1>LLM Deck-Generation Prompt Kit</h1>
+  <div class="sub">Copy-paste guardrails for driving a weak model from notes → Marp → PPTX. Pairs with <a href="../lessons/0002-deck-lifecycle.html">Lesson 0002</a>.</div>
+</header>
+
+<h2>A · The rules block (paste once, up front)</h2>
+<p>Give the model the guardrails before it writes any Markdown. This pre-empts the four classic failures.</p>
+<pre><code>You are generating a slide deck in Marp Markdown. Follow these rules exactly:
+
+STRUCTURE
+- The file MUST begin with YAML front-matter containing `marp: true`.
+- Put deck-wide settings in that front-matter: theme, paginate, size.
+- Separate every slide with a `---` ruler on its own line.
+
+THEME &amp; DIRECTIVES
+- theme must be one of: default, gaia, uncover. Never invent a theme name.
+- Use ONLY real directives: theme, paginate, header, footer, class,
+  backgroundColor, backgroundImage, color, size, math.
+- Do NOT invent directives (no `columns`, `layout`, `transition`, etc.).
+- A directive for ONE slide only must start with an underscore, e.g.
+  `&lt;!-- _class: lead --&gt;`. Without the underscore it applies to that
+  slide AND every slide after it.
+
+IMAGES
+- Background images use the `bg` keyword: `![bg](url)`, `![bg cover](url)`,
+  `![bg left:40%](url)`. A plain `![](url)` is a small inline image, not a bg.
+
+CONTENT BUDGET
+- Max ~6 bullets or ~40 words per slide. If more, split into two slides.
+- Marp does NOT reflow overflow — content that doesn't fit is cut off.
+
+OUTPUT
+- Output ONLY the Markdown, in one code block. No commentary.</code></pre>
+
+<h2>B · Stage prompts (drive it in turns)</h2>
+
+<span class="tag">Stage 2 · context</span>
+<pre><code>Here are my notes and code: &lt;paste&gt;.
+Summarize the key points an audience of &lt;who&gt; needs.
+Ask me up to 5 clarifying questions before we plan any slides.</code></pre>
+
+<span class="tag">Stage 3 · outline (lock this)</span>
+<pre><code>Draft a slide-by-slide OUTLINE only — no Markdown.
+One line per slide: title + a one-sentence purpose.
+Target ~&lt;N&gt; slides with a clear arc (hook → problem → solution → proof → ask).
+Wait for my approval before writing any Marp.</code></pre>
+
+<span class="tag">Stage 4 · generate</span>
+<pre><code>Convert the approved outline into Marp Markdown.
+Apply the RULES BLOCK above. theme: &lt;gaia&gt;, size: 16:9, paginate: true.
+Use `&lt;!-- _class: lead --&gt;` on the title slide only.</code></pre>
+
+<span class="tag">Stage 6 · targeted fix</span>
+<pre><code>Slide &lt;n&gt; &lt;describe the visible bug&gt;.
+&lt;name the cause from the checklist&gt;. Fix only that slide; return the full file.</code></pre>
+
+<h2>C · Review checklist (you, in the preview)</h2>
+<ul>
+  <li>☐ File starts with <code>marp: true</code> front-matter</li>
+  <li>☐ Theme is default / gaia / uncover (not invented)</li>
+  <li>☐ No made-up directives</li>
+  <li>☐ One-slide styles have the leading <code>_</code> (no leaking)</li>
+  <li>☐ Backgrounds use the <code>bg</code> keyword</li>
+  <li>☐ No slide overflows / text cut off</li>
+  <li>☐ Slide count ≈ the locked outline</li>
+</ul>
+<p class="note">Full symptom→fix table in <a href="0001-marp-cheatsheet.html">reference 0001, §8</a>.</p>
+
+<h2>D · Export commands</h2>
+<pre><code># preview live while editing
+marp -p -w deck.md
+
+# PPTX as images (pixel-perfect, NOT editable) — keeps presenter notes
+marp deck.md --pptx
+
+# PPTX editable text/shapes (experimental; needs LibreOffice; lower fidelity; no notes)
+marp deck.md --pptx --pptx-editable
+
+# also: --pdf , --images png
+# All of these need Chrome/Edge/Firefox installed.</code></pre>
+
+<h2>E · When the model is stuck — paste a doc at it</h2>
+<ul style="font-size:.9rem">
+  <li>Scope/directive confusion → <a href="https://marpit.marp.app/directives">marpit.marp.app/directives</a></li>
+  <li>Image/background bugs → <a href="https://marpit.marp.app/image-syntax">marpit.marp.app/image-syntax</a></li>
+  <li>Theme/math/fit → <a href="https://github.com/marp-team/marp-core">github.com/marp-team/marp-core</a></li>
+  <li>Export/PPTX → <a href="https://github.com/marp-team/marp-cli">github.com/marp-team/marp-cli</a></li>
+</ul>
+
+<footer>Reference 0002 · grounded in official Marp CLI / Marpit docs (2026-06-15). Pairs with Lesson 0002.</footer>
+</body>
+</html>
