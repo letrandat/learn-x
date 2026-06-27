@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 1 · Reading your extend-snacks.lua</title>
+<link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<p class="eyebrow">learn-lazyvim · lesson 01 · snacks</p>
+<h1>Reading your <code>extend-snacks.lua</code></h1>
+<p class="dek">One file, fully understood — what each line changes, and the merge model that makes "override only what you want" work.</p>
+
+<p>You already edit this file. The goal of this lesson is narrow: by the end you can point at any line and say <em>what it changes versus the default, and why</em>. Here is your current file (<code>repos/dotfiles/nvim/.config/nvim/lua/plugins/extend-snacks.lua</code>):</p>
+
+<pre class="lua"><code><span class="kw">return</span> {
+  <span class="str">"folke/snacks.nvim"</span>,        <span class="ann">-- ① which plugin this spec extends</span>
+  <span class="key">opts</span> = {                       <span class="ann">-- ② your overrides, deep-merged onto defaults</span>
+    <span class="key">terminal</span> = {                   <span class="ann">-- ③ the terminal MODULE</span>
+      <span class="key">win</span> = {
+        <span class="key">position</span> = <span class="str">"float"</span>,
+        <span class="key">width</span>  = <span class="num">0.9</span>,
+        <span class="key">height</span> = <span class="num">0.9</span>,
+        <span class="key">border</span> = <span class="str">"rounded"</span>,
+      },
+    },
+    <span class="key">picker</span> = {                     <span class="ann">-- ④ the picker MODULE</span>
+      <span class="key">layouts</span> = {                  <span class="ann">-- ⑤ how the window is sized</span>
+        <span class="key">default</span> = {
+          <span class="key">layout</span> = { <span class="key">width</span> = <span class="num">0.9</span>, <span class="key">height</span> = <span class="num">0.9</span> },
+        },
+      },
+      <span class="key">sources</span> = {                  <span class="ann">-- ⑥ per-source behaviour</span>
+        <span class="key">files</span> = {
+          <span class="key">follow</span>  = <span class="num">true</span>,
+          <span class="key">exclude</span> = { <span class="str">"node_modules"</span>, <span class="str">".git"</span> },
+        },
+        <span class="key">grep</span> = {
+          <span class="key">follow</span>  = <span class="num">true</span>,
+          <span class="key">exclude</span> = { <span class="str">"node_modules"</span>, <span class="str">".git"</span> },
+        },
+      },
+    },
+  },
+}</code></pre>
+
+<h2>① + ② The merge model — the one idea to keep</h2>
+<p>This file is a LazyVim <strong>plugin spec</strong>. Because <code>"folke/snacks.nvim"</code> is already defined by LazyVim, your spec doesn't redefine it — it <em>extends</em> it. The <code>opts</code> table is <strong>deep-merged</strong>, so your effective config is three layers stacked:</p>
+
+<div class="diagram">snacks defaults        ┐
+   ▼ overridden by      │  deep merge, key by key
+LazyVim defaults        │  (you only write the keys you
+   ▼ overridden by      │   want to change)
+YOUR opts  ────────────►┘  = effective config</div>
+
+<p>That's why the file is tiny: you are not configuring snacks, you are <em>diffing</em> against it. Every key below is a deliberate deviation from a default. Keep asking: <em>"what was the default before this line?"</em> — that question is the whole skill. (See <a href="../reference/glossary.html#">glossary: opts / module / source</a>.)</p>
+
+<h2>③ The terminal module — float instead of split</h2>
+<p><code>terminal</code> is one snacks <strong>module</strong>. Its default with no command is a <em>bottom split</em>. Your <code>win.position = "float"</code> + <code>0.9 / 0.9</code> + <code>"rounded"</code> turns the toggle terminal into a big centered floating box. The <code>0.9</code> values are proportions of the screen — <strong>numbers between 0 and 1 mean "fraction of the screen", integers would mean "this many characters".</strong> That single sizing rule shows up again two blocks down.</p>
+
+<h2>④ + ⑤ The picker module &amp; its layout</h2>
+<p><code>picker</code> is the module behind <span class="kbd">&lt;leader&gt;ff</span>, <span class="kbd">&lt;leader&gt;/</span>, and most of LazyVim's search keys. Snacks normally picks a <code>layout</code> <em>preset</em> by terminal width (a wide <code>default</code> with preview, or a stacked <code>vertical</code> on narrow terminals). You aren't replacing that logic — you're only resizing the <code>default</code> preset to <code>0.9 / 0.9</code> so the picker fills most of the screen. Same proportion rule as the terminal.</p>
+
+<h2>⑥ Sources — where picker <em>behaviour</em> lives</h2>
+<p>A <strong>source</strong> is a named picker type: <code>files</code> lists filenames, <code>grep</code> does live full-text search. Each has options. Your file touches two:</p>
+
+<table>
+<thead><tr><th>option</th><th>default</th><th>your value</th><th>effect</th></tr></thead>
+<tbody>
+<tr><td><code>follow</code></td><td><code>false</code></td><td><code>true</code></td><td>finder follows symlinks into their targets</td></tr>
+<tr><td><code>exclude</code></td><td><code>{}</code></td><td><code>node_modules</code>, <code>.git</code></td><td>finder always drops these paths</td></tr>
+</tbody>
+</table>
+
+<p>Note what you did <em>not</em> set: <code>hidden</code> and <code>ignored</code> both stay at their default <code>false</code>. <code>ignored = false</code> is the line that normally hides <code>node_modules</code> for you — because it tells the finder to skip anything in <code>.gitignore</code>.</p>
+
+<div class="note gotcha">
+<span class="label">The gotcha you just hit</span>
+<code>ignored = false</code> relies on the backend (<code>fd</code>) reading <code>.gitignore</code> — and <strong><code>fd</code> only reads <code>.gitignore</code> inside a git repository.</strong> Your <code>~/.config/opencode/</code> folder isn't a git repo, so <code>.gitignore</code> was ignored and <code>node_modules</code> leaked into <span class="kbd">&lt;leader&gt;ff</span>. Adding <code>exclude</code> fixes it unconditionally: it passes <code>--exclude node_modules</code> straight to <code>fd</code>/<code>rg</code>, no git required. That's exactly the two lines you added.
+</div>
+
+<div class="quiz" data-answer="1">
+<p class="q">Your config sets neither <code>hidden</code> nor <code>ignored</code> on the <code>files</code> source. In a normal git repo, what shows up in <span class="kbd">&lt;leader&gt;ff</span>?</p>
+<button>Hidden dotfiles included, gitignored files included too</button>
+<button>No hidden dotfiles, and no gitignored files appear</button>
+<button>Hidden dotfiles included, but gitignored files hidden</button>
+<button>No hidden dotfiles, but gitignored files still appear</button>
+<p class="explain" hidden>Both default to <code>false</code>: <code>hidden=false</code> drops dotfiles, <code>ignored=false</code> drops gitignored paths. Your <code>exclude</code> is just an extra, git-independent filter on top.</p>
+</div>
+
+<h2>Try it — make the merge model concrete (2 min)</h2>
+<p>Inside Neovim, prove to yourself these are deviations from a default:</p>
+<ul>
+<li>Run <code>:lua Snacks.picker.files({ hidden = true })</code> — watch dotfiles appear, then vanish again on a normal <span class="kbd">&lt;leader&gt;ff</span>. You just toggled one source option live.</li>
+<li>Run <span class="kbd">&lt;leader&gt;ff</span> in a real git repo vs. in <code>~/.config/opencode/</code> — same config, different result, because of the git-repo caveat above.</li>
+<li>Open <code>:Snacks picker</code> (or <span class="kbd">&lt;leader&gt;sk</span> for keymaps) to see how many sources exist beyond <code>files</code>/<code>grep</code>.</li>
+</ul>
+
+<div class="primary-source">
+<span class="label">Primary source</span>
+Read the snacks <a href="https://raw.githubusercontent.com/folke/snacks.nvim/main/docs/picker.md">picker docs</a> — skim the <em>Sources</em> section and the <code>files</code>/<code>grep</code> defaults. It's the authoritative map for everything in block ⑥. (Fetch the <code>raw.githubusercontent.com</code> URL; the GitHub page view hides the content.)
+</div>
+
+<p class="ask-teacher">Stuck or curious? I'm your teacher — ask me to expand any block, or to go deeper on layouts, the terminal module, or how LazyVim wires keys to sources.</p>
+
+<nav class="lesson-nav">
+<span>← (first lesson)</span>
+<a href="../reference/glossary.html">Glossary →</a>
+</nav>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

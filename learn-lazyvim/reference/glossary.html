@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>snacks.nvim — Glossary</title>
+<link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<p class="eyebrow">learn-lazyvim · reference</p>
+<h1>snacks.nvim Glossary</h1>
+<p class="dek">Canonical language for this course. Every lesson uses these terms exactly. Add a term only once Dat can use it correctly.</p>
+
+<h2>Configuration model</h2>
+
+<p><strong>snacks.nvim</strong>:
+A single Neovim plugin by folke bundling ~28 small "quality of life" modules (picker, terminal, dashboard, notifier, indent, scope…). LazyVim ships it as a core dependency.
+<br><em>Avoid</em>: "the snacks plugins" (it is one plugin, many modules).</p>
+
+<p><strong>module</strong>:
+One feature inside snacks (e.g. <code>picker</code>, <code>terminal</code>, <code>notifier</code>). Configured by a top-level key in the <code>opts</code> table. A module is on only if you pass options for it or set <code>enabled = true</code> (LazyVim enables several by default).</p>
+
+<p><strong>opts (the merge model)</strong>:
+The options table in a plugin spec. LazyVim deep-merges your <code>opts</code> on top of its own defaults, which sit on top of snacks' built-in defaults. Effective config = <em>snacks defaults → LazyVim defaults → your opts</em>. You only write the keys you want to change.
+<br><em>Avoid</em>: "the config" (be specific: defaults vs. override).</p>
+
+<h2>Picker</h2>
+
+<p><strong>picker</strong>:
+The snacks module that presents a searchable list (files, grep results, buffers, LSP symbols…) in a floating window with fuzzy matching. LazyVim's default picker — what <span class="kbd">&lt;leader&gt;ff</span> opens.</p>
+
+<p><strong>source</strong>:
+A named picker type defining <em>what</em> to list and how (its finder + format + preview). Snacks has 40+. Invoked as <code>Snacks.picker.files()</code> or via a LazyVim keymap. Configured under <code>picker.sources.&lt;name&gt;</code>.
+<br><em>Avoid</em>: "picker mode", "search type".</p>
+
+<p><strong>finder</strong>:
+The engine a source uses to generate items — e.g. the <code>files</code> source's finder shells out to <code>fd</code> (else <code>rg</code>/<code>find</code>); the <code>grep</code> source's finder shells out to ripgrep.</p>
+
+<p><strong>files source</strong>:
+Lists filenames under the root. Defaults: <code>hidden=false</code>, <code>ignored=false</code>, <code>follow=false</code>. Backs <span class="kbd">&lt;leader&gt;ff</span>.</p>
+
+<p><strong>grep source</strong>:
+Live full-text search across files (ripgrep). <code>live=true</code> by default. Backs <span class="kbd">&lt;leader&gt;/</span>.</p>
+
+<h3>Source options</h3>
+<p><strong>ignored</strong>: When <code>false</code> (default), files matching <code>.gitignore</code> are excluded. <strong>Caveat:</strong> the backend (<code>fd</code>) only honours <code>.gitignore</code> <em>inside a git repo</em>; outside one, gitignored paths leak in.</p>
+<p><strong>hidden</strong>: When <code>false</code> (default), dotfiles/dotdirs are excluded.</p>
+<p><strong>follow</strong>: When <code>true</code>, the finder follows symbolic links.</p>
+<p><strong>exclude</strong>: An array of glob patterns the finder always drops (e.g. <code>{ "node_modules", ".git" }</code>). Works regardless of git status — the reliable hammer.</p>
+<p><strong>cmd / args</strong>: Force the backend command (<code>"fd"</code>/<code>"rg"</code>/<code>"find"</code>) and pass extra CLI args. Auto-detected if omitted.</p>
+
+<h3>Layout</h3>
+<p><strong>layout</strong>:
+The on-screen arrangement of a picker's windows (input box, results list, preview). Chosen by a <code>preset</code> (snacks switches between <code>default</code> horizontal and <code>vertical</code> based on terminal width).</p>
+<p><strong>width / height</strong>:
+A value in <code>0–1</code> is a <em>proportion</em> of the screen; an integer ≥1 is a <em>character count</em>; <code>0</code> means full. So <code>0.9</code> = 90% of the screen.</p>
+
+<h2>Terminal</h2>
+<p><strong>terminal module</strong>:
+snacks' floating/split terminal. <code>Snacks.terminal.toggle(cmd, opts)</code> shows/hides a terminal keyed by command+cwd+env+count. Styling comes from <code>win</code> (a <code>snacks.win.Config</code>): with no <code>cmd</code> it defaults to a bottom split, with a <code>cmd</code> it floats.</p>
+
+<p class="ask-teacher">Glossary feels off or missing a term? Ask your teacher to revise it.</p>
+</body>
+</html>
