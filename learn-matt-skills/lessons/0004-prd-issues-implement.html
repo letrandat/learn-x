@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 4 — plan → slice → build</title>
+<link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 0004 · The Assembly Line</p>
+<h1>plan → slice → build: <code>to-prd</code> · <code>to-issues</code> · <code>implement</code></h1>
+<p class="dek">Alignment is done. Now the three skills that turn a shared understanding into merged code — an assembly line where each stage hands the next a cleaner artefact, and your setup config threads through all of them.</p>
+
+<div class="note">
+<span class="label">The thread that ties them together</span>
+All three skills open with the same line: <em>"The issue tracker and triage label vocabulary should have been provided to you — run <code>/setup-matt-pocock-skills</code> if not."</em> This is why Lesson 2 came first. Every stage reads your <code>docs/agents/*.md</code> — the tracker to publish to, the labels to apply, the glossary to speak in.
+</div>
+
+<h2 id="prd">Stage 1 — <code>to-prd</code>: synthesise, don't interview</h2>
+<p>The single most important thing about <code>to-prd</code> is what it <strong>refuses</strong> to do:</p>
+<blockquote>Do NOT interview the user — just synthesize what you already know.<cite>— to-prd/SKILL.md</cite></blockquote>
+<p>This is the deliberate complement to <a href="0003-grill-with-docs.html">Lesson 3</a>. <code>grill-with-docs</code> does <em>all</em> the asking; <code>to-prd</code> does <em>none</em>. By the time you run it, the conversation already holds the decisions — its job is to <strong>write them down</strong>, not re-extract them. Grill to align; <code>/to-prd</code> to record.</p>
+
+<h3>Its three steps</h3>
+<ol>
+<li><strong>Explore the codebase</strong>, using the domain glossary vocabulary and respecting ADRs in the area you touch. (Lesson 3's artefacts paying off.)</li>
+<li><strong>Sketch the test seams</strong> — and <em>check them with you</em>. The rule: <em>"Prefer existing seams. Use the highest seam possible. The fewer seams, the better — the ideal number is one."</em> A <a href="../reference/glossary.html#seam">seam</a> is where you'll test the feature; fewer/higher seams = simpler, more durable tests.</li>
+<li><strong>Write the PRD and publish it</strong> to your tracker, tagged <code>ready-for-agent</code> — no extra triage needed.</li>
+</ol>
+
+<h3>What's in the PRD (and what's banned)</h3>
+<table>
+<thead><tr><th>Section</th><th>Holds</th></tr></thead>
+<tbody>
+<tr><td>Problem Statement</td><td>the problem, from the user's POV</td></tr>
+<tr><td>Solution</td><td>the solution, from the user's POV</td></tr>
+<tr><td>User Stories</td><td>a <em>long</em> numbered list — "As an X, I want Y, so that Z"</td></tr>
+<tr><td>Implementation Decisions</td><td>modules, interfaces, schema, API contracts, arch decisions</td></tr>
+<tr><td>Testing Decisions</td><td>what makes a good test, which modules, prior art</td></tr>
+<tr><td>Out of Scope / Notes</td><td>boundaries + anything else</td></tr>
+</tbody>
+</table>
+<div class="note">
+<span class="label">The banned thing</span>
+<em>"Do NOT include specific file paths or code snippets. They may end up being outdated very quickly."</em> A PRD records <strong>decisions</strong>, not code — decisions age slowly, code ages fast. (One exception: a prototype snippet that encodes a decision more precisely than prose — a state machine, schema, type shape — trimmed to just the decision.)
+</div>
+
+<h2 id="issues">Stage 2 — <code>to-issues</code>: vertical slices</h2>
+<p>A PRD is one big lump. <code>to-issues</code> cuts it into <strong>independently-grabbable</strong> issues — and the <em>shape</em> of the cut is the whole lesson.</p>
+
+<h3 id="tracer">Tracer bullets, not layers</h3>
+<blockquote>Each issue is a thin vertical slice that cuts through ALL integration layers end-to-end, NOT a horizontal slice of one layer.<cite>— to-issues/SKILL.md</cite></blockquote>
+<div class="diagram">HORIZONTAL (wrong)              VERTICAL / tracer bullet (right)
+┌──────────────────┐           ┌──┐ ┌──┐ ┌──┐
+│ all the UI       │           │UI│ │UI│ │UI│
+├──────────────────┤           ├──┤ ├──┤ ├──┤
+│ all the API      │           │API│ │API│ │API│   each slice = one
+├──────────────────┤           ├──┤ ├──┤ ├──┤      complete path,
+│ all the schema   │           │DB│ │DB│ │DB│       demoable on its own
+└──────────────────┘           └──┘ └──┘ └──┘
+one giant unverifiable step    slice1 slice2 slice3</div>
+<p>Each slice delivers a <strong>narrow but complete</strong> path through every layer (schema → API → UI → tests) and is <strong>demoable on its own</strong>. That's a "tracer bullet": fire one thin shot all the way to the target, see it land, then widen. It connects straight to failure mode #3 — you get working, verifiable feedback after every slice instead of at the end.</p>
+
+<h3>Two more moves</h3>
+<ul>
+<li><strong>Prefactor first.</strong> <em>"Make the change easy, then make the easy change."</em> Any restructuring that makes the slices simpler is its own first slice.</li>
+<li><strong>Quiz, then publish.</strong> It presents the breakdown as a numbered list (title · blocked-by · user-stories-covered) and asks: granularity right? dependencies right? merge/split anything? It <em>iterates until you approve</em> — then publishes in dependency order (blockers first, so real IDs can be referenced), each tagged <code>ready-for-agent</code>.</li>
+</ul>
+
+<h2 id="implement">Stage 3 — <code>implement</code>: build it</h2>
+<p>You met this one in Lesson 1's correction. It's the <span class="tag user">user-invoked</span> build conductor, and its whole body is five instructions:</p>
+<pre><code>Implement the work described in the PRD or issues.
+Use /tdd where possible, at pre-agreed seams.
+Run typechecking + single test files regularly, full suite once at the end.
+Once done, use /review.
+Commit to the current branch.</code></pre>
+<p>Note how it consumes the previous stages' output: the <strong>PRD/issues</strong> tell it what to build, the <strong>pre-agreed seams</strong> (from <code>to-prd</code> step 2) tell <code>tdd</code> where to test, and the <code>ready-for-agent</code> label is the handoff token that said these were ready. One conductor (<code>/implement</code>) reaching for one player (<a href="../reference/glossary.html#tdd-skill"><code>tdd</code></a>), then <code>/review</code>, then commit.</p>
+
+<h2 id="whole">The whole line, in one view</h2>
+<div class="diagram">  grill-with-docs ──► to-prd ──────► to-issues ──────► implement ──► /review ──► commit
+  (Lesson 3)          synthesise      vertical          drives
+  aligns +            decisions       slices            build,
+  writes CONTEXT      into a PRD      (tracer           uses tdd
+  + ADRs              + label         bullets)          at seams
+        │                  │               │                │
+        └─ glossary ───────┴─ labels ──────┴─ tracker ──────┘   all from docs/agents/*</div>
+<p>Each arrow narrows ambiguity: a conversation → a recorded spec → grabbable slices → working code. The <code>ready-for-agent</code> label rides along the whole way — it's what makes the slices safe to hand to an AFK agent.</p>
+
+<h2 id="check">Check yourself</h2>
+<div class="quiz" data-answer="1">
+  <p class="q">Why does to-prd deliberately refuse to interview you?</p>
+  <button>Because interviews waste API tokens</button>
+  <button>Because grilling already did the asking</button>
+  <button>Because PRDs cannot contain questions</button>
+  <p class="explain" hidden>to-prd is the complement of grill-with-docs: grilling extracts the decisions, to-prd just synthesises and records what the conversation already holds.</p>
+</div>
+<div class="quiz" data-answer="2">
+  <p class="q">What is a tracer-bullet (vertical) slice?</p>
+  <button>All of one layer, built completely</button>
+  <button>The riskiest part, tackled first</button>
+  <button>A complete path through every layer</button>
+  <p class="explain" hidden>A thin slice cutting end-to-end through schema, API, UI and tests — demoable on its own — not a horizontal slice of a single layer.</p>
+</div>
+<div class="quiz" data-answer="0">
+  <p class="q">Why are file paths banned from a PRD?</p>
+  <button>Decisions age slowly; code ages fast</button>
+  <button>Because agents cannot read paths</button>
+  <button>Because the tracker strips them out</button>
+  <p class="explain" hidden>A PRD records durable decisions. Specific paths and snippets go stale quickly, so they're excluded (save the rare prototype snippet that encodes a decision).</p>
+</div>
+
+<div class="primary-source">
+<span class="label">Primary source — read this next</span>
+<a href="https://github.com/mattpocock/skills/blob/main/skills/engineering/to-prd/SKILL.md">to-prd</a> (read the full PRD template) and <a href="https://github.com/mattpocock/skills/blob/main/skills/engineering/to-issues/SKILL.md">to-issues</a> (the vertical-slice rules). For the "seam" idea underneath it all, skim <a href="https://github.com/mattpocock/skills/blob/main/skills/engineering/codebase-design/SKILL.md">codebase-design</a>.
+</div>
+
+<p class="ask-teacher">Want to run the real line? Give me a small feature and we'll go grill → to-prd → to-issues live against your local-markdown tracker. Ask me anything unclear first.</p>
+
+<div class="lesson-nav">
+  <a href="0003-grill-with-docs.html">← Lesson 3: grill-with-docs</a>
+  <a href="0005-maintain-deep-modules.html">Next → Lesson 5: maintain</a>
+</div>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

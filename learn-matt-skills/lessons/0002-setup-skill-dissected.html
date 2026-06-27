@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 2 — setup-matt-pocock-skills, dissected</title>
+<link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 0002 · The Bootstrap Skill</p>
+<h1><code>setup-matt-pocock-skills</code>, dissected</h1>
+<p class="dek">The one skill you run first, taken apart: its file anatomy, the three configs it writes, and the design decisions that make it a model for every other skill.</p>
+
+<div class="note">
+<span class="label">The job in one sentence</span>
+Answer three per-repo questions <em>once</em>, write the answers to <code>docs/agents/*.md</code>, and point your <code>CLAUDE.md</code> at them — so every other engineering skill reads consistent config instead of re-guessing each session.
+</div>
+
+<h2 id="anatomy">Component 1 — file anatomy</h2>
+<p>The skill is a folder of six files. Five are <strong>seed templates</strong>; one is the brain.</p>
+
+<div class="diagram">setup-matt-pocock-skills/
+├── SKILL.md                    ← the brain: frontmatter + 5-step process
+├── issue-tracker-github.md     ← seed template (GitHub flavour)
+├── issue-tracker-gitlab.md     ← seed template (GitLab flavour)
+├── issue-tracker-local.md      ← seed template (local-markdown flavour)
+├── triage-labels.md            ← seed template (label mapping table)
+└── domain.md                   ← seed template (domain-doc consumer rules)</div>
+
+<h3>The frontmatter is a contract</h3>
+<pre><code>---
+name: setup-matt-pocock-skills
+description: Configure this repo for the engineering skills — set up its
+             issue tracker, triage label vocabulary, and domain doc layout.
+             Run once before first use of the other engineering skills.
+disable-model-invocation: true
+---</code></pre>
+<ul>
+<li><strong><code>name</code></strong> becomes the slash command <code>/setup-matt-pocock-skills</code>.</li>
+<li><strong><code>description</code></strong> is the <em>only</em> part loaded into context until the skill fires — so it states <em>what it does</em> + <em>when</em> ("Run once before first use"). This is <a href="../reference/glossary.html#progressive-disclosure">progressive disclosure</a>: the agent reads cheap descriptions of all skills, pulls a full body only on a match.</li>
+<li><strong><code>disable-model-invocation: true</code></strong> makes it <span class="tag user">user-invoked</span> only. Setup is a one-time, file-writing ceremony — you never want it firing silently mid-task.</li>
+</ul>
+
+<h3>The body is a conversation script, not a script</h3>
+<blockquote>This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.<cite>— SKILL.md, opening line</cite></blockquote>
+<p>That sentence is the whole philosophy in miniature. The body is a 5-step process the agent runs with judgement: <strong>Explore → Present &amp; ask → Confirm → Write → Done.</strong> The five other <code>.md</code> files are <a href="../reference/glossary.html#bundled-resource">bundled resources</a> — referenced by relative link, read only at the Write step, then copied into <em>your</em> repo as starting content.</p>
+
+<h2 id="configs">Component 2 — the three per-repo configs</h2>
+<p>Everything setup does serves three outputs under <code>docs/agents/</code>. Learn what each answers and <em>who reads it</em>.</p>
+
+<h3 id="config-a">A · Issue tracker → <code>docs/agents/issue-tracker.md</code></h3>
+<p><strong>Answers:</strong> where do issues live, and how do I touch them?<br>
+<strong>Read by:</strong> <code>/triage</code>, <code>/to-issues</code>, <code>/to-prd</code> — they need "publish to the issue tracker" to mean a concrete command.</p>
+<p>Setup <em>proposes</em> a default by sniffing <code>git remote -v</code>, then offers:</p>
+<ul>
+<li><strong>GitHub</strong> — the <code>gh</code> CLI</li>
+<li><strong>GitLab</strong> — the <code>glab</code> CLI</li>
+<li><strong>Local markdown</strong> — files under <code>.scratch/&lt;feature&gt;/</code> (solo / no remote)</li>
+<li><strong>Other</strong> (Jira, Linear…) — you describe it in a paragraph, recorded as prose</li>
+</ul>
+<p>If (and only if) GitHub or GitLab: one follow-up — <strong>"PRs as a request surface? (default no)"</strong>. If yes, <code>/triage</code> also pulls <em>external</em> PRs into the queue. The seed template stores it as a literal switch:</p>
+<blockquote><strong>PRs as a request surface: no.</strong> <em>(Set to <code>yes</code> if this repo treats external PRs as feature requests; <code>/triage</code> reads this flag.)</em><cite>— issue-tracker-github.md</cite></blockquote>
+<p>The template is <strong>self-documenting config</strong>: the setting <em>and</em> the explanation of what reads it live in the same file. It even bakes in GitHub's gotcha — issues and PRs share a number space, so <code>#42</code> is ambiguous; resolve with <code>gh pr view 42</code>, fall back to <code>gh issue view 42</code>.</p>
+
+<h3 id="config-b">B · Triage labels → <code>docs/agents/triage-labels.md</code></h3>
+<p><strong>Answers:</strong> what label strings does <em>this</em> repo actually use?<br>
+<strong>Read by:</strong> <code>/triage</code>, which runs issues through a five-state machine. Without a mapping it would create <em>duplicate</em> labels.</p>
+<div class="diagram">              ┌──────────────┐
+   new ──────► │ needs-triage │   maintainer must evaluate
+              └──────┬───────┘
+       ┌─────────────┼──────────────┬───────────────┐
+       ▼             ▼              ▼               ▼
+  needs-info   ready-for-agent  ready-for-human   wontfix
+  (ask          (fully spec'd,   (needs a          (dead)
+   reporter)     AFK-ready)       human)</div>
+<p>The seed file is a two-column table: canonical role on the left, <em>your</em> real label string on the right (defaults equal). The standout state is <a href="../reference/glossary.html#ready-for-agent"><code>ready-for-agent</code></a> — "so completely specified an AFK agent can grab it with zero human context." That's the endgame of the whole pipeline.</p>
+
+<h3 id="config-c">C · Domain docs → <code>docs/agents/domain.md</code></h3>
+<p><strong>Answers:</strong> where's the shared language, and how should skills consume it?<br>
+<strong>Read by:</strong> <code>improve-codebase-architecture</code>, <code>tdd</code>, <code>diagnosing-bugs</code> — they read <code>CONTEXT.md</code> + <code>docs/adr/</code> <em>before</em> exploring code.</p>
+<p>The only choice is layout: <strong>single-context</strong> (one <code>CONTEXT.md</code> at root, most repos) vs <strong>multi-context</strong> (<code>CONTEXT-MAP.md</code> pointing at per-context files, monorepos). Three rules the seed file bakes in:</p>
+<ol>
+<li><strong>Proceed silently if the files don't exist.</strong> Don't nag — <code>/domain-modeling</code> creates them <em>lazily</em> when a term is actually resolved.</li>
+<li><strong>Use the glossary's vocabulary</strong> in every output. A concept not in the glossary is a signal: you're inventing language (stop) or there's a real gap (flag it).</li>
+<li><strong>Flag ADR conflicts explicitly</strong> — <em>"Contradicts ADR-0007 — but worth reopening because…"</em> — never silently override.</li>
+</ol>
+
+<h2 id="design">Component 3 — the design details worth stealing</h2>
+<p>Read setup as a worked example of how to write <em>any</em> good skill. Five seams:</p>
+<table>
+<thead><tr><th>Principle</th><th>How setup does it</th></tr></thead>
+<tbody>
+<tr><td>Config-as-markdown, repo-owned</td><td>Output lives in your committed <code>docs/agents/</code>. Skills stay stateless; the repo holds state. Hand-edit later without re-running.</td></tr>
+<tr><td>Teach, don't assume</td><td>"Assume the user does not know what these terms mean." Each section opens with an explainer.</td></tr>
+<tr><td>One decision at a time</td><td>"Walk the user through the three decisions one at a time… Don't dump all three at once."</td></tr>
+<tr><td>Defaults from evidence</td><td>Reads <code>git remote -v</code> to <em>propose</em> GitHub vs GitLab rather than asking cold.</td></tr>
+<tr><td>Idempotent, non-destructive writes</td><td>Edit <code>CLAUDE.md</code> if present, else <code>AGENTS.md</code>, else <em>ask</em>. Update an existing <code>## Agent skills</code> block in place — never append a duplicate; never clobber surrounding edits.</td></tr>
+<tr><td>Confirm before write</td><td>Show a draft of the block + all three docs, let the user edit, <em>then</em> write. Reversible by design.</td></tr>
+</tbody>
+</table>
+
+<h2 id="output">What you end up with</h2>
+<div class="diagram">CLAUDE.md
+  └── ## Agent skills          ← three one-line pointers
+docs/agents/
+  ├── issue-tracker.md         ← config A
+  ├── triage-labels.md         ← config B
+  └── domain.md                ← config C</div>
+<p>From here, the <a href="0001-the-skills-system-mental-model.html#flow">daily flow</a> from Lesson 1 has the config it needs to run.</p>
+
+<h2 id="check">Check yourself</h2>
+<div class="quiz" data-answer="2">
+  <p class="q">Why does setup write config to files instead of just remembering it?</p>
+  <button>Because markdown renders faster than code</button>
+  <button>Because the agent cannot create files</button>
+  <button>Because skills are stateless; repos hold state</button>
+  <p class="explain" hidden>Skills are stateless prompts. Persisting config to docs/agents/ lets every future skill run — and every other skill — read the same answers, and lets you hand-edit later.</p>
+</div>
+<div class="quiz" data-answer="0">
+  <p class="q">Which file does setup edit when both CLAUDE.md and AGENTS.md exist?</p>
+  <button>It edits the CLAUDE.md file only</button>
+  <button>It edits the AGENTS.md file only</button>
+  <button>It edits both of the two files</button>
+  <p class="explain" hidden>Precedence: CLAUDE.md wins if it exists. It never creates AGENTS.md when CLAUDE.md is already there, and never clobbers the other.</p>
+</div>
+<div class="quiz" data-answer="1">
+  <p class="q">What does the ready-for-agent triage label promise?</p>
+  <button>A human will review it soon</button>
+  <button>An AFK agent can grab it cold</button>
+  <button>The reporter must add details</button>
+  <p class="explain" hidden>ready-for-agent means the issue is so fully specified an autonomous (away-from-keyboard) agent can pick it up with zero extra human context.</p>
+</div>
+
+<div class="primary-source">
+<span class="label">Primary source — read this next</span>
+The skill's own <a href="https://github.com/mattpocock/skills/blob/main/skills/engineering/setup-matt-pocock-skills/SKILL.md">SKILL.md</a> and its five seed templates. Reading the templates beside this lesson is the fastest way to see "self-documenting config" in the wild.
+</div>
+
+<p class="ask-teacher">Want to actually run this skill on a repo and watch it produce the three files? Ask me — that's the natural next lesson.</p>
+
+<div class="lesson-nav">
+  <a href="0001-the-skills-system-mental-model.html">← Lesson 1: the mental model</a>
+  <a href="0003-grill-with-docs.html">Next → Lesson 3: grill-with-docs</a>
+</div>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

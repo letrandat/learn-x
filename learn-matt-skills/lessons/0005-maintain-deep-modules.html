@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 5 — maintain: deep modules</title>
+<link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 0005 · Maintain — Fighting the Ball of Mud</p>
+<h1>maintain: deep modules &amp; the architecture review</h1>
+<p class="dek">The stage you run every few days, not once per feature. It fights failure mode #4 — entropy — with a shared design vocabulary (<code>codebase-design</code>) and a visual review that grills you toward deeper modules (<code>improve-codebase-architecture</code>).</p>
+
+<div class="note">
+<span class="label">Closing the loop</span>
+You now have the whole daily flow: setup → align → plan → slice → build. But shipped code rots. Agents <em>accelerate</em> entropy — they add complexity fast. This stage is the counter-pressure: invest in design continuously, not as a rescue mission.
+</div>
+
+<h2 id="vocab">Foundation — <code>codebase-design</code>: the shared vocabulary</h2>
+<p>Before you can improve architecture you need words for it. <code>codebase-design</code> is a <span class="tag model">model-invoked</span> vocabulary skill — it holds no process, just <em>language</em>, used wherever code is designed. The rule is strict: <em>use these terms exactly — don't substitute "component," "service," "API," or "boundary."</em></p>
+
+<table>
+<thead><tr><th>Term</th><th>Means</th><th>Avoid</th></tr></thead>
+<tbody>
+<tr><td><strong>Module</strong></td><td>anything with an interface + implementation (fn, class, package, slice) — scale-agnostic</td><td>unit, component, service</td></tr>
+<tr><td><strong>Interface</strong></td><td><em>everything</em> a caller must know: types, invariants, ordering, error modes, perf — not just the signature</td><td>API, signature</td></tr>
+<tr><td><strong>Depth</strong></td><td>leverage at the interface: behaviour exercised per unit of interface learned</td><td>—</td></tr>
+<tr><td><strong>Seam</strong> <em>(Feathers)</em></td><td>a place you can alter behaviour without editing there; where the interface lives</td><td>boundary</td></tr>
+<tr><td><strong>Adapter</strong></td><td>a concrete thing satisfying an interface at a seam (role, not substance)</td><td>—</td></tr>
+<tr><td><strong>Leverage</strong></td><td>what callers gain from depth: more capability per unit learned</td><td>—</td></tr>
+<tr><td><strong>Locality</strong></td><td>what maintainers gain: change/bugs/knowledge concentrate in one place</td><td>—</td></tr>
+</tbody>
+</table>
+
+<h3 id="deep">Deep vs shallow — the whole idea in one picture</h3>
+<div class="diagram">DEEP (the goal)              SHALLOW (avoid)
+┌───────────────────┐        ┌─────────────────────────────────┐
+│  small interface  │        │        large interface          │
+├───────────────────┤        ├─────────────────────────────────┤
+│                   │        │   thin implementation           │
+│  lots of hidden   │        └─────────────────────────────────┘
+│  implementation   │        interface ≈ implementation →
+│                   │        it barely earns its keep
+└───────────────────┘</div>
+<p>A <strong>deep module</strong> hides a lot of behaviour behind a small interface. A <strong>shallow</strong> one has an interface nearly as complex as its implementation — it just passes work through. Design asks three questions: <em>fewer methods? simpler params? hide more complexity inside?</em></p>
+
+<h3 id="principles">Four principles worth memorising</h3>
+<ol>
+<li><strong>The deletion test.</strong> Imagine deleting the module. If complexity <em>vanishes</em>, it was a pass-through (shallow). If complexity <em>reappears across N callers</em>, it was earning its keep. "Concentrates complexity" is the signal you want.</li>
+<li><strong>Depth is a property of the interface, not the implementation.</strong> A deep module can be internally made of small swappable parts — they just aren't in the interface.</li>
+<li><strong>The interface is the test surface.</strong> Callers and tests cross the <em>same</em> seam. If you need to test <em>past</em> the interface, the module is the wrong shape. (This is the seam your <code>to-prd</code> chose and <code>tdd</code> tested against — same concept.)</li>
+<li><strong>One adapter = a hypothetical seam; two = a real one.</strong> Don't introduce a seam unless something actually varies across it.</li>
+</ol>
+<div class="note">
+<span class="label">Why "depth-as-leverage", not Ousterhout's ratio</span>
+Matt explicitly <em>rejects</em> depth-as-(impl-lines ÷ interface-lines) — it rewards padding the implementation. Depth here means <strong>leverage</strong>: capability per unit of interface learned. (Also rejected: "interface" = the TS keyword; "boundary" = DDD's bounded context.)
+</div>
+
+<h2 id="review">The orchestrator — <code>improve-codebase-architecture</code></h2>
+<p>This <span class="tag user">user-invoked</span> skill hunts for <strong>deepening opportunities</strong> — refactors that turn shallow modules into deep ones, for testability and AI-navigability. It's the busiest composition in the repo:</p>
+<div class="diagram">/improve-codebase-architecture     (user-invoked conductor)
+   ├── /codebase-design     ← the architecture vocabulary (above)
+   ├── Explore subagent     ← walks the codebase noting friction
+   ├── /grilling            ← designs the candidate you pick
+   └── /domain-modeling     ← captures terms/ADRs as decisions crystallise
+   reads: CONTEXT.md (domain names) + docs/adr/ (decisions not to re-litigate)</div>
+
+<h3>Its three steps</h3>
+<ol>
+<li><strong>Explore.</strong> Read <code>CONTEXT.md</code> + ADRs first, then send the <code>Explore</code> subagent through the code noting friction — bouncing between many small modules, shallow modules, pure functions extracted for testability while the real bugs hide in how they're <em>called</em> (no locality), leaky seams, untestable interfaces. Apply the deletion test to anything suspicious.</li>
+<li><strong>Present a visual HTML report.</strong> Written to the OS <strong>temp dir, never the repo</strong> (<code>$TMPDIR</code> → fallback <code>/tmp</code>), then opened for you. Tailwind + Mermaid. Each candidate is a card: <em>Files · Problem · Solution · Benefits (in locality/leverage terms) · before/after diagram · a strength badge</em> (<code>Strong</code> / <code>Worth exploring</code> / <code>Speculative</code>). Ends with a <em>Top recommendation</em>. It does <strong>not</strong> propose interfaces yet — it asks which one you want to explore.</li>
+<li><strong>Grilling loop.</strong> Once you pick, it runs <code>/grilling</code> (Lesson 3!) to walk the design tree — what sits behind the seam, what tests survive — with <code>/domain-modeling</code> side effects inline: new module name not in <code>CONTEXT.md</code>? add it. Reject a candidate for a load-bearing reason? offer an ADR so future reviews don't re-suggest it.</li>
+</ol>
+
+<div class="note">
+<span class="label">You've seen this report format before</span>
+"Write a self-contained, visual HTML file to temp and open it." That's exactly how <em>these lessons</em> are built — the same visual-artefact pattern Matt favours for anything a human needs to look at and compare.
+</div>
+
+<h2 id="loop">How it closes the loop</h2>
+<div class="diagram">  align → plan → slice → build ──────────► ship
+    ▲                                        │
+    │                                        ▼
+    └──────── maintain (every few days) ◄────┘
+              /improve-codebase-architecture
+              deepen modules · keep CONTEXT.md + ADRs current</div>
+<p>The maintain stage feeds back into align: its grilling sharpens <code>CONTEXT.md</code> and records ADRs, so the <em>next</em> feature starts from a cleaner model and a deeper codebase. That feedback is the whole point — design invested <em>every day</em>, not entropy paid down in a big-bang rewrite.</p>
+
+<h2 id="check">Check yourself</h2>
+<div class="quiz" data-answer="2">
+  <p class="q">What makes a module "deep"?</p>
+  <button>Many methods covering many cases</button>
+  <button>More implementation lines than interface</button>
+  <button>Lots of behaviour behind a small interface</button>
+  <p class="explain" hidden>Depth = leverage: a large amount of behaviour exercised through a small interface. Matt rejects the lines-ratio definition because it rewards padding the implementation.</p>
+</div>
+<div class="quiz" data-answer="0">
+  <p class="q">A module passes the deletion test when removing it…</p>
+  <button>scatters complexity across many callers</button>
+  <button>removes complexity from the codebase</button>
+  <button>has no effect on the other modules</button>
+  <p class="explain" hidden>If deleting it makes complexity reappear across N callers, it was earning its keep (deep). If complexity just vanishes, it was a shallow pass-through.</p>
+</div>
+<div class="quiz" data-answer="1">
+  <p class="q">Where does the architecture report get written?</p>
+  <button>Into a docs folder in the repo</button>
+  <button>Into the OS temp directory only</button>
+  <button>Into the issue tracker as a card</button>
+  <p class="explain" hidden>To $TMPDIR (fallback /tmp), then opened for you — deliberately nothing lands in the repo. Each run gets a fresh timestamped file.</p>
+</div>
+
+<div class="primary-source">
+<span class="label">Primary source — read this next</span>
+<a href="https://github.com/mattpocock/skills/blob/main/skills/engineering/codebase-design/SKILL.md">codebase-design</a> (learn the glossary cold — it's used across skills) and <a href="https://github.com/mattpocock/skills/blob/main/skills/engineering/improve-codebase-architecture/SKILL.md">improve-codebase-architecture</a>. For going deeper: the skill's <code>DEEPENING.md</code> and <code>DESIGN-IT-TWICE.md</code> resources.
+</div>
+
+<p class="ask-teacher">That's the full usage loop. Want to run <code>/improve-codebase-architecture</code> against a real repo and read a live report? Ask me. Otherwise we pivot to phase 2 — authoring your own skills.</p>
+
+<div class="lesson-nav">
+  <a href="0004-prd-issues-implement.html">← Lesson 4: plan → slice → build</a>
+  <a href="../reference/glossary.html">Glossary →</a>
+</div>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

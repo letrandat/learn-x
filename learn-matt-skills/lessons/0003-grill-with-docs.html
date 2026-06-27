@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 3 — grill-with-docs: the flagship</title>
+<link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 0003 · Alignment + Shared Language</p>
+<h1><code>grill-with-docs</code>: the flagship</h1>
+<p class="dek">The first stage of the daily flow, and Matt's "single coolest technique." It closes the alignment gap (failure mode #1) and builds your project's shared language (failure mode #2) — in the same conversation.</p>
+
+<div class="note">
+<span class="label">Where you are</span>
+Setup is done — you ran it, and <code>docs/agents/{domain,issue-tracker,triage-labels}.md</code> now exist. The loop can begin. Its first stage is <strong>align</strong>.
+</div>
+
+<h2 id="thin">Read the skill — it's three lines</h2>
+<p>This is the most important thing to see first. The entire <code>grill-with-docs/SKILL.md</code> body is:</p>
+<pre><code>Run a /grilling session, using the /domain-modeling skill.</code></pre>
+<p>That's it. <code>grill-with-docs</code> is a <strong>pure orchestrator</strong> — a <span class="tag user">user-invoked</span> skill that composes two <span class="tag model">model-invoked</span> disciplines. It's the <a href="../reference/glossary.html#composition-rule">composition rule</a> made visible: one conductor, two players.</p>
+
+<div class="diagram">/grill-with-docs           (user-invoked conductor — 3 lines)
+   ├── /grilling           (model-invoked — the relentless interview loop)
+   └── /domain-modeling    (model-invoked — writes CONTEXT.md + ADRs as terms resolve)</div>
+
+<p>So learning <code>grill-with-docs</code> means learning its two players. Here they are.</p>
+
+<h2 id="grilling">Player 1 — <code>grilling</code>: the interview loop</h2>
+<p>The whole skill is one tight instruction. Internalise its four rules:</p>
+<blockquote>Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.<cite>— grilling/SKILL.md</cite></blockquote>
+<ul>
+<li><strong>Relentless + tree-structured.</strong> It doesn't ask scattershot — it walks the decision tree, resolving dependencies in order.</li>
+<li><strong>One question at a time.</strong> "Asking multiple questions at once is bewildering." (Same pacing rule setup used.)</li>
+<li><strong>Always recommend an answer.</strong> Never a bare "what do you want?" — it proposes, you react. Far faster.</li>
+<li><strong>Explore code before asking.</strong> "If a question can be answered by exploring the codebase, explore the codebase instead." It won't waste your time asking what it can find out itself.</li>
+</ul>
+<p>This is the fix for failure mode #1 — <em>"the agent didn't do what I want."</em> The gap closes <em>before</em> a line is written.</p>
+
+<h2 id="domain-modeling">Player 2 — <code>domain-modeling</code>: capture the language</h2>
+<p>Grilling alone produces alignment that evaporates when the session ends. <code>domain-modeling</code> makes it durable by writing two artefacts <em>as the interview happens</em>.</p>
+
+<div class="note">
+<span class="label">Active, not passive</span>
+"Merely <em>reading</em> <code>CONTEXT.md</code> for vocabulary is not this skill — that's a one-line habit any skill can do. This skill is for when you're <strong>changing</strong> the model." Setup's <code>domain.md</code> config is the <em>reading</em> habit; this is the <em>writing</em> discipline.
+</div>
+
+<h3>The five moves it makes during a session</h3>
+<table>
+<thead><tr><th>Move</th><th>What it sounds like</th></tr></thead>
+<tbody>
+<tr><td>Challenge against the glossary</td><td>"Your glossary defines 'cancellation' as X, but you mean Y — which?"</td></tr>
+<tr><td>Sharpen fuzzy language</td><td>"You said 'account' — do you mean the Customer or the User?"</td></tr>
+<tr><td>Discuss concrete scenarios</td><td>invents edge cases to force precise boundaries between concepts</td></tr>
+<tr><td>Cross-reference with code</td><td>"Your code cancels whole Orders, but you said partial is possible — which?"</td></tr>
+<tr><td>Update inline</td><td>resolves a term → writes it to <code>CONTEXT.md</code> immediately, never batched</td></tr>
+</tbody>
+</table>
+
+<h3 id="context">Artefact A — <code>CONTEXT.md</code> (the glossary)</h3>
+<p>An <em>opinionated</em> glossary. When several words mean one thing, it picks one and lists the rest under <code>_Avoid_</code>:</p>
+<pre><code># Ordering
+
+## Language
+
+**Order**:
+A customer's request to purchase one or more items.
+_Avoid_: Purchase, transaction
+
+**Customer**:
+A person or organization that places orders.
+_Avoid_: Client, buyer, account</code></pre>
+<p>Three rules keep it sharp: <strong>tight</strong> (1–2 sentences, define what it IS not what it does), <strong>project-specific only</strong> (no general programming concepts like "timeout"), and <strong>devoid of implementation detail</strong> — it's a glossary, never a spec or scratchpad. This is the fix for failure mode #2: concision, every session.</p>
+
+<h3 id="adr">Artefact B — ADRs (the decisions)</h3>
+<p>An Architectural Decision Record can be <em>one paragraph</em>: "what's the context, what did we decide, why."</p>
+<pre><code># Event-sourced orders
+
+We store orders as an append-only event log rather than mutable rows,
+because the audit trail is a hard business requirement and replaying
+events lets us rebuild read models cheaply.</code></pre>
+<p>Crucially, ADRs are offered <strong>sparingly</strong> — only when <em>all three</em> are true:</p>
+<ol>
+<li><strong>Hard to reverse</strong> — changing your mind later costs real effort.</li>
+<li><strong>Surprising without context</strong> — a future reader will wonder "why on earth this way?"</li>
+<li><strong>The result of a real trade-off</strong> — genuine alternatives existed; you picked one for reasons.</li>
+</ol>
+<p>Miss any one → skip it. Easy-to-reverse? You'll just reverse it. Not surprising? Nobody wonders. No alternative? Nothing to record. This gate is what stops your <code>docs/adr/</code> from filling with noise.</p>
+
+<h2 id="lazy">The discipline tying it together: lazy creation</h2>
+<p>You never sit down to "write the docs." Both artefacts are created <strong>the moment a term or decision crystallises</strong> — no <code>CONTEXT.md</code>? It's created when the first term resolves. No <code>docs/adr/</code>? Created when the first ADR is warranted. (This is exactly why setup's <code>domain.md</code> says "proceed silently if the files don't exist" — they're meant to grow lazily.)</p>
+
+<h2 id="when">When to reach for it</h2>
+<p>At the <strong>align</strong> stage — before <code>/to-prd</code> — whenever you're about to build something non-trivial and want to (a) be sure the agent understands you and (b) leave behind language the next session inherits. For a quick non-code plan with no docs to build, plain <code>/grill-me</code> is the lighter tool.</p>
+
+<h2 id="check">Check yourself</h2>
+<div class="quiz" data-answer="2">
+  <p class="q">What does the grill-with-docs SKILL.md body actually contain?</p>
+  <button>A long checklist of interview questions</button>
+  <button>A script that edits the CONTEXT file</button>
+  <button>One line composing two other skills</button>
+  <p class="explain" hidden>It's a pure orchestrator: "Run a /grilling session, using the /domain-modeling skill." The substance lives in the two model-invoked players.</p>
+</div>
+<div class="quiz" data-answer="0">
+  <p class="q">When should the agent offer to create an ADR?</p>
+  <button>Only when all three gate tests pass</button>
+  <button>Whenever a new term gets resolved</button>
+  <button>After every grilling session ends</button>
+  <p class="explain" hidden>Hard to reverse AND surprising without context AND the result of a real trade-off. Miss any one and you skip it — otherwise docs/adr/ fills with noise.</p>
+</div>
+<div class="quiz" data-answer="1">
+  <p class="q">What belongs in CONTEXT.md?</p>
+  <button>Implementation details and specs</button>
+  <button>Project-specific terms, tightly defined</button>
+  <button>Every concept the code touches</button>
+  <p class="explain" hidden>It's an opinionated glossary of project-specific terms only — no general programming concepts, no implementation detail. Define what a term IS, in 1–2 sentences.</p>
+</div>
+
+<div class="primary-source">
+<span class="label">Primary source — read this next</span>
+The three source files: <a href="https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md">grilling</a>, <a href="https://github.com/mattpocock/skills/blob/main/skills/engineering/domain-modeling/SKILL.md">domain-modeling</a>, and its <a href="https://github.com/mattpocock/skills/blob/main/skills/engineering/domain-modeling/CONTEXT-FORMAT.md">CONTEXT-FORMAT.md</a>. Read all three together — the orchestrator only makes sense as the sum of its players.
+</div>
+
+<p class="ask-teacher">Want to feel it rather than read it? Ask me to run a real grilling session on something you're actually planning — that's the best way to learn this one.</p>
+
+<div class="lesson-nav">
+  <a href="0002-setup-skill-dissected.html">← Lesson 2: the setup skill</a>
+  <a href="0004-prd-issues-implement.html">Next → Lesson 4: plan → slice → build</a>
+</div>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

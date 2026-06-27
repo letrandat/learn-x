@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 6 — ask-matt: the map</title>
+<link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 0006 · The Router Over Everything</p>
+<h1>ask-matt: the map of the whole system</h1>
+<p class="dek">You've learned the skills one at a time. <code>ask-matt</code> is the skill that holds them <em>all</em> as a single map — so when you forget which one to reach for, you ask. This lesson is mostly consolidation: every skill you know, placed on one route, with the gaps named.</p>
+
+<div class="note">
+<span class="label">Why this skill exists</span>
+"You don't remember every skill, so ask." <code>ask-matt</code> stores no process and ships no code — it's a <strong>router</strong>: a description of how the user-invoked skills connect. Marked <code>disable-model-invocation: true</code>, so the model never fires it on its own. <em>You</em> invoke it, on purpose, when lost.
+</div>
+
+<h2 id="vocab">One new word: <em>flow</em></h2>
+<p>A <strong>flow</strong> is a path through the skills. The system is organised as:</p>
+<ul>
+<li><strong>One main flow</strong> — idea → ship, the route most work travels.</li>
+<li><strong>Two on-ramps</strong> — situations that <em>generate</em> work, then merge onto the main flow.</li>
+<li><strong>Standalone</strong> skills — off the main flow entirely.</li>
+</ul>
+<p>That's the whole organising idea. Everything you've learned hangs off it.</p>
+
+<h2 id="map">The map</h2>
+<div class="diagram">                          ON-RAMPS (work you didn't ask for)
+                          ┌────────────────────────────────────────┐
+                          │  /triage  ── raw bugs/requests → ready  │
+                          │  /improve-codebase-architecture ─ idea  │
+                          └───────────────┬──────────────────────--─┘
+                                          │ merges in as an idea
+                                          ▼
+   MAIN FLOW   ┌──────────────────────────────────────────────────────────┐
+   idea→ship   │  1. /grill-with-docs   sharpen the idea (stateful)         │
+               │        │                                                   │
+               │   need a runnable answer?  ──► /handoff → /prototype       │
+               │        │                         → /handoff back           │
+               │        ▼                                                   │
+               │  2. multi-session build?                                   │
+               │     YES → /to-prd → /to-issues → (fresh ctx) /implement ×N │
+               │     NO  → /implement  right here                           │
+               └──────────────────────────────────────────────────────────┘
+
+   PRECONDITION  /setup-matt-pocock-skills   (run once, before any flow)
+   STANDALONE    /grill-me (no codebase) · /teach · /writing-great-skills</div>
+
+<h2 id="placed">Everything you've learned, placed</h2>
+<table>
+<thead><tr><th>You learned…</th><th>Lives on the map as…</th></tr></thead>
+<tbody>
+<tr><td><code>setup-matt-pocock-skills</code> (L2)</td><td>the <strong>precondition</strong> — configures tracker, labels, docs the rest assume</td></tr>
+<tr><td><code>grill-with-docs</code> (L3)</td><td>step 1 of the <strong>main flow</strong> — the stateful front door</td></tr>
+<tr><td><code>to-prd → to-issues → implement</code> (L4)</td><td>the multi-session branch of step 2</td></tr>
+<tr><td><code>improve-codebase-architecture</code> (L5)</td><td>a <strong>codebase-health on-ramp</strong> — surfaces a deepening idea → re-enters at grill</td></tr>
+</tbody>
+</table>
+<p>So the "daily flow" from Lessons 2–5 <em>is</em> the main flow plus one on-ramp. <code>ask-matt</code> didn't add skills — it gave them a shape.</p>
+
+<h2 id="hygiene">The one rule the map enforces: context hygiene</h2>
+<p>Keep steps 1–3 in <strong>one unbroken context window</strong> — don't <code>/compact</code> or clear until after <code>/to-issues</code> — so grilling, PRD, and issues all build on the same thinking. Each <code>/implement</code> then starts <em>fresh</em> from its issue.</p>
+<div class="note">
+<span class="label">Why: the smart zone</span>
+The window (~120k tokens on SOTA models) where the model still reasons sharply. If a session nears it before <code>/to-issues</code>, don't push on a degraded model — <code>/handoff</code> and continue fresh. This is <em>why</em> the issues are made independent: so each build can afford a clean context.
+</div>
+
+<h3 id="bridge">handoff vs compact — the two ways to cross a boundary</h3>
+<table>
+<thead><tr><th></th><th><code>/handoff</code></th><th><code>/compact</code> (built-in)</th></tr></thead>
+<tbody>
+<tr><td>What it does</td><td>writes the thread to a markdown file</td><td>summarises earlier turns in place</td></tr>
+<tr><td>You end up</td><td>in a <strong>new</strong> session, referencing the file</td><td>in the <strong>same</strong> conversation</td></tr>
+<tr><td>Use when</td><td>you need a fresh window but must preserve context (e.g. detour into <code>/prototype</code>)</td><td>at an intentional break between phases</td></tr>
+<tr><td>Slogan</td><td>handoff <strong>forks</strong></td><td>compact <strong>continues</strong></td></tr>
+</tbody>
+</table>
+
+<h2 id="gaps">What's NOT on this map (and why)</h2>
+<p>Two skills you asked to learn are deliberately absent — and the reason teaches you something:</p>
+<ul>
+<li><strong><code>prototype</code></strong> — it <em>is</em> on the map, but only as a <em>detour</em> off step 1, reached via <code>/handoff</code> when a question needs a runnable answer. Next lesson.</li>
+<li><strong><code>diagnosing-bugs</code></strong> — absent entirely. Why? <code>ask-matt</code> routes only the <em>user-invoked</em> skills. <code>diagnosing-bugs</code> is <span class="tag model">model-invoked</span> (no <code>disable-model-invocation</code>) — it fires when you <em>describe</em> a bug, you don't navigate to it. It's a reflex, not a destination. (Recall the user/model axis from Lesson 1.)</li>
+</ul>
+<p>That's the deep cut: a router only lists the doors <em>you</em> open. The reflexes that fire on their own don't need a map.</p>
+
+<h2 id="check">Check yourself</h2>
+<div class="quiz" data-answer="2">
+  <p class="q">In ask-matt's vocabulary, a "flow" is…</p>
+  <button>a single skill run in isolation</button>
+  <button>the order skills were authored</button>
+  <button>a path that runs through the skills</button>
+  <p class="explain" hidden>A flow is a path through the skills. Most work travels the one main flow; two on-ramps merge onto it; the rest stand alone.</p>
+</div>
+<div class="quiz" data-answer="0">
+  <p class="q">You need a fresh window but must keep the context. Use…</p>
+  <button>handoff — it forks to a new session</button>
+  <button>compact — it forks to a new session</button>
+  <button>triage — it forks to a new session</button>
+  <p class="explain" hidden>handoff writes the thread to a file so you can continue in a new session. compact summarises in place (same conversation). Slogan: handoff forks, compact continues.</p>
+</div>
+<div class="quiz" data-answer="1">
+  <p class="q">Why is diagnosing-bugs absent from ask-matt's map?</p>
+  <button>It was removed from the skills repo</button>
+  <button>It is model-invoked, not navigated to</button>
+  <button>It belongs to the setup precondition</button>
+  <p class="explain" hidden>ask-matt routes only user-invoked skills. diagnosing-bugs fires automatically when you describe a bug — a reflex, not a destination — so it needs no map entry.</p>
+</div>
+
+<div class="primary-source">
+<span class="label">Primary source — read this next</span>
+<a href="https://github.com/mattpocock/skills/blob/main/skills/engineering/ask-matt/SKILL.md">ask-matt/SKILL.md</a> — read it as the table of contents for the whole repo. Then skim the <a href="https://www.aihero.dev/ai-coding-dictionary/smart-zone">smart-zone</a> entry it links.
+</div>
+
+<p class="ask-teacher">Notice anything that contradicts the map in your own repo? Ask me — that's exactly the kind of thing <code>ask-matt</code> is meant to settle. Next up: <code>prototype</code>, the detour for answering questions you can't settle in conversation.</p>
+
+<div class="lesson-nav">
+  <a href="0005-maintain-deep-modules.html">← Lesson 5: maintain</a>
+  <a href="../reference/glossary.html">Glossary →</a>
+</div>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

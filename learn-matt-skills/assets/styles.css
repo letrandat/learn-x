@@ -1,0 +1,173 @@
+/* ============================================================
+   Shared course stylesheet — learn-matt-skills
+   The first component every teach workspace earns.
+   Every lesson + reference links this so the course looks like
+   one consistent thing. Tufte-inspired: serif, airy, printable.
+   ============================================================ */
+
+:root {
+  --ink: #1a1a1a;
+  --ink-soft: #4a4a4a;
+  --ink-faint: #6b6b6b;
+  --paper: #fdfcf9;
+  --rule: #e3ded3;
+  --accent: #9a3b2e;      /* matt-red, used sparingly */
+  --accent-soft: #c98a7f;
+  --code-bg: #f3f0e7;
+  --user: #2f5d50;        /* user-invoked */
+  --model: #3a4a7a;       /* model-invoked */
+  --maxw: 46rem;
+}
+
+* { box-sizing: border-box; }
+
+html { font-size: 19px; -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0 auto;
+  max-width: var(--maxw);
+  padding: 4rem 1.5rem 8rem;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  line-height: 1.62;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+}
+
+/* --- Course chrome --- */
+.eyebrow {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.6rem;
+}
+
+h1 {
+  font-size: 2.15rem;
+  line-height: 1.12;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.4rem;
+}
+
+.dek {
+  font-size: 1.12rem;
+  color: var(--ink-soft);
+  font-style: italic;
+  margin: 0 0 2.4rem;
+}
+
+h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 3rem 0 0.8rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--rule);
+}
+
+h3 { font-size: 1.1rem; font-weight: 600; margin: 1.8rem 0 0.5rem; }
+
+p { margin: 0 0 1.1rem; }
+
+a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-soft); }
+a:hover { background: #f6ece9; }
+
+strong { font-weight: 650; }
+
+ul, ol { margin: 0 0 1.2rem; padding-left: 1.4rem; }
+li { margin: 0.35rem 0; }
+
+code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.82em;
+  background: var(--code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+
+blockquote {
+  margin: 1.4rem 0;
+  padding: 0.2rem 0 0.2rem 1.2rem;
+  border-left: 3px solid var(--accent-soft);
+  color: var(--ink-soft);
+  font-style: italic;
+}
+blockquote cite { display: block; font-style: normal; font-size: 0.82rem; color: var(--ink-faint); margin-top: 0.4rem; }
+
+/* --- Callout boxes --- */
+.note {
+  background: #f7f4ec;
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: 1rem 1.2rem;
+  margin: 1.6rem 0;
+  font-size: 0.95rem;
+}
+.note .label {
+  font-family: ui-monospace, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+/* --- Tables --- */
+table { border-collapse: collapse; width: 100%; margin: 1.4rem 0; font-size: 0.9rem; }
+th, td { text-align: left; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); }
+
+/* --- Invocation tags --- */
+.tag { font-family: ui-monospace, monospace; font-size: 0.7rem; padding: 0.12em 0.5em; border-radius: 999px; white-space: nowrap; }
+.tag.user  { color: var(--user);  background: #e6f0ec; }
+.tag.model { color: var(--model); background: #e7ebf6; }
+
+/* --- ASCII / diagram blocks --- */
+.diagram { font-family: ui-monospace, monospace; font-size: 0.72rem; line-height: 1.4; background: #faf8f1; border: 1px dashed var(--rule); border-radius: 8px; padding: 1.2rem; overflow-x: auto; white-space: pre; color: var(--ink-soft); }
+
+/* --- Footer nav --- */
+.lesson-nav { margin-top: 4rem; padding-top: 1.4rem; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; gap: 1rem; font-size: 0.85rem; flex-wrap: wrap; }
+
+.primary-source { background: #eef3f0; border-radius: 8px; padding: 1rem 1.2rem; margin: 2rem 0; font-size: 0.92rem; }
+.primary-source .label { font-family: ui-monospace, monospace; font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--user); display: block; margin-bottom: 0.3rem; }
+
+.ask-teacher { font-size: 0.85rem; color: var(--ink-faint); font-style: italic; margin-top: 2.5rem; text-align: center; }
+
+/* --- Quiz widget (pairs with assets/quiz.js) --- */
+.quiz { background: #f7f4ec; border: 1px solid var(--rule); border-radius: 8px; padding: 1.2rem 1.4rem; margin: 1.8rem 0; }
+.quiz .q { font-weight: 600; margin: 0 0 0.9rem; }
+.quiz button {
+  display: block; width: 100%; text-align: left; margin: 0.4rem 0;
+  padding: 0.6rem 0.9rem; border: 1px solid var(--rule); border-radius: 6px;
+  background: #fff; color: var(--ink); font: inherit; font-size: 0.9rem; cursor: pointer;
+}
+.quiz button:hover:not(:disabled) { border-color: var(--accent-soft); }
+.quiz button:disabled { cursor: default; opacity: 0.92; }
+.quiz button.right { background: #e6f0ec; border-color: var(--user); color: var(--user); font-weight: 600; }
+.quiz button.wrong { background: #f6ece9; border-color: var(--accent); color: var(--accent); text-decoration: line-through; }
+.quiz .explain { margin: 0.9rem 0 0; font-size: 0.88rem; color: var(--ink-soft); font-style: italic; }
+
+/* --- Print: make these beautiful on paper --- */
+@media print {
+  body { max-width: none; padding: 0; font-size: 11pt; background: #fff; }
+  h2 { page-break-after: avoid; }
+  pre, table, .note, .diagram, .quiz { page-break-inside: avoid; }
+  .lesson-nav, .ask-teacher, .quiz button { display: none; }
+  a { color: #000; border: none; }
+}

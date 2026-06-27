@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 8 — predictability &amp; the two loads</title>
+<link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 0008 · Phase 2 — Authoring · Part I of IV</p>
+<h1>Predictability &amp; the two loads</h1>
+<p class="dek">You've spent seven lessons <em>using</em> Matt's skills. Now you slide into the author's seat. The whole craft rests on one virtue and one tradeoff — get these, and every later decision (what to disclose, when to split, which words to pick) is just this tension applied again.</p>
+
+<div class="note">
+<span class="label">The thesis — the one sentence</span>
+A skill exists to <strong>wrangle determinism out of a stochastic system</strong>. Its root virtue is <strong>predictability</strong>: the agent takes the same <em>process</em> every run — <em>not</em> the same output. A brainstorm skill should predictably <em>diverge</em>; its tokens vary, its behaviour doesn't. Every lever below serves predictability.
+</div>
+
+<h2 id="flip">The flip: from picking the axis to owning it</h2>
+<p>In <a href="0001-the-skills-system-mental-model.html">Lesson 1</a> you learned to <em>read</em> the user-vs-model axis. As an author you now <em>choose</em> it — and the choice is forced, because the <code>description</code> field <strong>is</strong> the axis. Keep it and the skill is model-invoked; delete it and the skill is user-invoked. There is no third state.</p>
+<p>The reason the choice matters is that each option spends a <em>different</em> currency. Authoring is mostly the art of deciding which of two loads to pay.</p>
+
+<h2 id="loads">The two loads</h2>
+<table>
+<thead><tr><th></th><th>Context load</th><th>Cognitive load</th></tr></thead>
+<tbody>
+<tr><td>Who pays</td><td>the <strong>model</strong></td><td><strong>you</strong>, the human</td></tr>
+<tr><td>What it is</td><td>the <code>description</code> sitting in the window <em>every turn</em> — tokens <em>and</em> attention</td><td>remembering the skill exists and when to reach for it (you are the index)</td></tr>
+<tr><td>Paid by</td><td><span class="tag model">model-invoked</span> skills</td><td><span class="tag user">user-invoked</span> skills</td></tr>
+<tr><td>Brake on</td><td>splitting into more model-invoked skills</td><td>splitting into more user-invoked skills</td></tr>
+</tbody>
+</table>
+<p>Cognitive load is <strong>not</strong> a cost to minimise to zero — it's the price of human agency, the reason some skills <em>stay</em> user-invoked. Spend it where your judgement matters; remove it where it doesn't.</p>
+
+<h2 id="decision">The invocation decision</h2>
+<div class="diagram">  Does the AGENT need to reach this skill on its own
+  (or must ANOTHER skill be able to reach it)?
+
+        │ yes                          │ no
+        ▼                              ▼
+  ┌──────────────────┐         ┌──────────────────┐
+  │  MODEL-INVOKED   │         │  USER-INVOKED    │
+  │  keep description│         │  strip it        │
+  │  agent + skills  │         │  only you, by    │
+  │  can fire it     │         │  name, can fire  │
+  │  pays context    │         │  zero context,   │
+  │  load FOREVER    │         │  spends YOUR head│
+  └──────────────────┘         └──────────────────┘</div>
+<p>The rule, stated plainly: <strong>pick model-invocation only when the agent must reach the skill itself, or another skill must.</strong> If it only ever fires by hand, make it user-invoked and pay no context load. Note the asymmetry — a description only ever <em>adds</em> agent discovery; the human can always type the name. So model-invocation is user-reach <em>plus</em> agent-reach, never agent-only.</p>
+
+<div class="note">
+<span class="label">Why other skills can only reach model-invoked ones</span>
+Reachability rides on the description. A model-invoked skill has one, so another skill can fire it — which is why shared <strong>reference</strong> often lives in a model-invoked skill. A user-invoked skill has no description, so <em>nothing but you</em> can reach it — not even another skill.
+</div>
+
+<h2 id="router">When cognitive load piles up: the router skill</h2>
+<p>Go all-in on user-invoked skills and you eventually can't remember what you have. That piled-up cognitive load has a specific cure: a <strong>router skill</strong> — one user-invoked skill that names the others and says when to reach for each. You've already met one: <a href="0006-ask-matt-the-map.html"><code>ask-matt</code></a>. A router can only <em>hint</em>, never fire them (no descriptions to fire) — but it gives you one name to remember instead of many.</p>
+
+<h2 id="check">Check yourself</h2>
+<div class="quiz" data-answer="1">
+  <p class="q">Predictability in a skill means the agent reliably produces…</p>
+  <button>the very same output text</button>
+  <button>the very same working process</button>
+  <button>the very same token counts</button>
+  <p class="explain" hidden>Same process, not same output. A brainstorm skill should predictably diverge — its behaviour is fixed even as its tokens vary.</p>
+</div>
+<div class="quiz" data-answer="2">
+  <p class="q">Deleting a skill's <code>description</code> field makes it…</p>
+  <button>reachable by every other skill</button>
+  <button>cheaper but slower to load</button>
+  <button>user-invoked, costing zero context</button>
+  <p class="explain" hidden>The description IS the axis. Strip it → user-invoked: only you can fire it by name, and it adds nothing to the context window every turn.</p>
+</div>
+<div class="quiz" data-answer="0">
+  <p class="q">Choose model-invocation precisely when…</p>
+  <button>the agent itself must reach it</button>
+  <button>you will run it most often</button>
+  <button>the skill body is fairly long</button>
+  <p class="explain" hidden>The trigger is agent (or other-skill) reach, not frequency or size. If it only ever fires by hand, stay user-invoked and pay no context load.</p>
+</div>
+<div class="quiz" data-answer="2">
+  <p class="q">Too many user-invoked skills to remember is cured by a…</p>
+  <button>longer per-skill description text</button>
+  <button>merge of them all into one file</button>
+  <button>router skill that names the rest</button>
+  <p class="explain" hidden>Piled-up cognitive load → a router skill (e.g. ask-matt): one user-invoked skill naming the others and when to use each. It hints; it can't fire them.</p>
+</div>
+
+<div class="primary-source">
+<span class="label">Primary source — read this next</span>
+<a href="https://github.com/mattpocock/skills/blob/main/skills/productivity/writing-great-skills/SKILL.md">writing-great-skills/SKILL.md</a> — read the opening line and the <strong>Invocation</strong> section. Then skim its <a href="https://github.com/mattpocock/skills/blob/main/skills/productivity/writing-great-skills/GLOSSARY.md">GLOSSARY.md</a> entries for <em>Predictability</em>, <em>Context Load</em>, and <em>Cognitive Load</em> — note the <code>Avoid:</code> lists, which are the words the skill deliberately rejects.
+</div>
+
+<p class="ask-teacher">Stuck on why cognitive load isn't just "bad overhead," or want to draft the frontmatter for a real skill of your own right now? Ask me — that's what I'm here for. Next: <strong>Part II — the information hierarchy ladder</strong>, where you decide what goes in <code>SKILL.md</code> and what gets pushed behind a pointer (progressive disclosure, seen from the author's side).</p>
+
+<div class="lesson-nav">
+  <a href="0007-prototype.html">← Lesson 7: prototype</a>
+  <a href="../reference/glossary.html">Glossary →</a>
+</div>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

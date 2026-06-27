@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 7 — prototype</title>
+<link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 0007 · The Detour Off Step 1</p>
+<h1>prototype: throwaway code that answers a question</h1>
+<p class="dek">The map (Lesson 6) named this but didn't open it. When grilling hits a question you can't settle in conversation — one that needs <em>state</em>, <em>business logic</em>, or <em>a UI you have to see</em> — you detour into <code>/prototype</code>, learn the answer, and throw the code away.</p>
+
+<div class="note">
+<span class="label">The one-line definition</span>
+A prototype is <strong>throwaway code that answers a question</strong>. The <em>question</em> decides the shape. Get the shape wrong and the whole prototype is wasted — so the first move is never "write code," it's "which question am I answering?"
+</div>
+
+<h2 id="branch">Step zero: pick the branch</h2>
+<p><code>prototype</code> is <span class="tag user">user-invoked</span> (a deliberate detour, not a reflex). It immediately forks on the kind of question:</p>
+<table>
+<thead><tr><th></th><th>LOGIC branch</th><th>UI branch</th></tr></thead>
+<tbody>
+<tr><td>Question</td><td>"Does this logic / state model feel right?"</td><td>"What should this look like?"</td></tr>
+<tr><td>Artifact</td><td>a tiny interactive <strong>terminal app</strong></td><td>several <strong>UI variants</strong> on one route</td></tr>
+<tr><td>You do</td><td>press keys, watch state change</td><td>flip between layouts in the browser</td></tr>
+<tr><td>Fits</td><td>a backend module / state machine</td><td>a page or component</td></tr>
+</tbody>
+</table>
+<p>If it's genuinely ambiguous and the user is AFK: <strong>match the surrounding code</strong> — backend → logic, page → UI — and state the assumption at the top of the prototype.</p>
+
+<h2 id="rules">Six rules that bind both branches</h2>
+<ol>
+<li><strong>Throwaway from day one, marked as such.</strong> Live next to the real code (context is obvious) but named so a reader sees it's a prototype.</li>
+<li><strong>One command to run.</strong> Use the project's existing task runner — the user starts it without thinking.</li>
+<li><strong>No persistence by default.</strong> State lives in memory. Persistence is what you're <em>checking</em>, not depending on.</li>
+<li><strong>Skip the polish.</strong> No tests, no error handling beyond runnable, no abstractions.</li>
+<li><strong>Surface the state.</strong> After every action (logic) or every switch (UI), show the full relevant state.</li>
+<li><strong>Delete or absorb when done.</strong> Don't leave it rotting in the repo.</li>
+</ol>
+
+<h2 id="logic">LOGIC branch — the portable module + thin shell</h2>
+<p>The keeper insight, and where this connects to Lesson 5: <strong>the logic goes in a pure, portable module; the TUI is a throwaway shell over it.</strong></p>
+<div class="diagram">  ┌─────────────────────────────────────────┐
+  │  TUI shell  (throwaway)                    │
+  │  clear screen → render frame → read key   │
+  │     ▲                    │ calls into      │
+  │     │ state out          ▼ (one direction) │
+  │  ┌───────────────────────────────────┐    │
+  │  │  pure logic module  (the KEEPER)  │    │
+  │  │  reducer / state machine /         │    │
+  │  │  pure fns / class — no I/O, no log │    │
+  │  └───────────────────────────────────┘    │
+  └─────────────────────────────────────────┘
+   when answered: delete shell, lift module into real code</div>
+<p>Pick the module shape from the <em>question</em>, not from what's easy to wire up: a <strong>reducer</strong> <code>(state, action) =&gt; state</code> for discrete events; a <strong>state machine</strong> when "which actions are even legal now" is the question; a <strong>set of pure functions</strong> when there's no current state; a <strong>class</strong> when it genuinely owns ongoing state. Keep it pure — nothing flows from TUI back into the logic. That purity is exactly what lets the validated module be lifted into the real codebase later. <em>(This is a deep module being prototyped: small interface, hidden behaviour — see <a href="0005-maintain-deep-modules.html">Lesson 5</a>.)</em></p>
+<p>The TUI: on every tick <code>console.clear()</code> and re-render the <strong>whole</strong> frame — current state (one field per line) then the keyboard shortcuts <code>[a] add  [t] tick  [q] quit</code>. One stable screen, never growing scrollback.</p>
+
+<h2 id="ui">UI branch — variants behind <code>?variant=</code></h2>
+<p>Generate <strong>several radically different</strong> variants on one route, switchable from a floating bar. Strongly prefer:</p>
+<ul>
+<li><strong>Sub-shape A (default):</strong> render variants <em>inside an existing page</em>, gated by a <code>?variant=</code> URL param — real header, real data, real density. A variant judged in a vacuum always looks fine.</li>
+<li><strong>Sub-shape B (last resort):</strong> a throwaway route, only when the thing has no existing page to live in. Follow the project's routing convention; put "prototype" in the path.</li>
+</ul>
+<p>Default to <strong>3</strong> variants, cap at 5. They must be <em>structurally</em> different — different layout, hierarchy, primary affordance — not recoloured. The <strong>floating switcher</strong>: ←/label/→, updates the URL (shareable, reload-stable), arrow-key support, and <strong>hidden in production builds</strong> so a stray merge can't ship it.</p>
+<div class="note">
+<span class="label">The feedback you're hunting for</span>
+The valuable response is rarely "B wins." It's <em>"I want the header from B with the sidebar from C"</em> — that recombination is the actual design the user wants. Same spirit in LOGIC: <em>"wait, that shouldn't be possible"</em> is a bug in the <strong>idea</strong>, which is the whole point.
+</div>
+
+<h2 id="done">When done: keep the answer, kill the code</h2>
+<p>The <strong>answer</strong> is the only thing worth keeping from a prototype — never the code. Capture it somewhere durable (commit, ADR, issue, or a <code>NOTES.md</code> beside the prototype) <em>with the question it answered</em>. Then delete the throwaway, or fold the validated decision into real code. If you're AFK, leave the placeholder so the verdict gets filled in before deletion.</p>
+<p>And recall the bridge: you reached this detour via <code>/handoff</code> out of the grill thread, and you carry the answer back with <code>/handoff</code> in — referenced from the original idea (<a href="0006-ask-matt-the-map.html">Lesson 6</a>).</p>
+
+<h2 id="check">Check yourself</h2>
+<div class="quiz" data-answer="1">
+  <p class="q">What decides a prototype's shape?</p>
+  <button>Whatever is fastest to wire up</button>
+  <button>The question it is meant to answer</button>
+  <button>Whichever the framework prefers</button>
+  <p class="explain" hidden>"The question decides the shape." Logic question → terminal app; look-and-feel question → UI variants. Picking by what's easy to build wastes the prototype.</p>
+</div>
+<div class="quiz" data-answer="2">
+  <p class="q">In the LOGIC branch, which part is worth keeping?</p>
+  <button>The terminal shell that reads keys</button>
+  <button>The screen-clearing render loop</button>
+  <button>The pure logic module behind it</button>
+  <p class="explain" hidden>The TUI shell is throwaway; the pure reducer/state-machine/function module is portable and gets lifted into the real codebase. Keep them strictly separate.</p>
+</div>
+<div class="quiz" data-answer="0">
+  <p class="q">The single thing worth keeping from any prototype is…</p>
+  <button>the answer to its question</button>
+  <button>the variant components built</button>
+  <button>the one-command run script</button>
+  <p class="explain" hidden>Throwaway code, durable answer. Capture the answer (and the question) in a commit/ADR/NOTES.md, then delete or absorb the code.</p>
+</div>
+
+<div class="primary-source">
+<span class="label">Primary source — read this next</span>
+<a href="https://github.com/mattpocock/skills/blob/main/skills/engineering/prototype/SKILL.md">prototype/SKILL.md</a> plus its two branch files <a href="https://github.com/mattpocock/skills/blob/main/skills/engineering/prototype/LOGIC.md">LOGIC.md</a> and <a href="https://github.com/mattpocock/skills/blob/main/skills/engineering/prototype/UI.md">UI.md</a> — a clean example of progressive disclosure: SKILL.md routes, the branch file carries the detail.</p>
+</div>
+
+<p class="ask-teacher">Want to actually build one against a real repo — drive a state machine in the terminal, or flip three layouts in the browser? Ask me; this is the most fun skill to do hands-on. Next: <code>diagnosing-bugs</code> — where building a tight feedback loop <em>is</em> the whole skill.</p>
+
+<div class="lesson-nav">
+  <a href="0006-ask-matt-the-map.html">← Lesson 6: ask-matt</a>
+  <a href="../reference/glossary.html">Glossary →</a>
+</div>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

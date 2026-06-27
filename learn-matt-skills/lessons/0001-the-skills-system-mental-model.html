@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 1 — The Skills System: Mental Model</title>
+<link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 0001 · Mental Model</p>
+<h1>Matt Pocock's skills, in one mental model</h1>
+<p class="dek">Before any single skill makes sense, you need the shape of the whole thing: small composable prompts, one invocation axis, four failure modes they fight.</p>
+
+<h2 id="what">What a "skill" actually is</h2>
+<p>A skill is <strong>not code</strong> and <strong>not a framework</strong>. It is a folder containing a <code>SKILL.md</code> — a markdown file with YAML frontmatter and a body of instructions — plus optional bundled files. When you type <code>/name</code> (or the agent reaches for it), that body is loaded into the agent's context and steers how it behaves for that task.</p>
+<p>Matt contrasts this with GSD, BMAD, and Spec-Kit:</p>
+<blockquote>
+These skills are designed to be small, easy to adapt, and composable. They work with any model. Hack around with them. Make them your own.
+<cite>— mattpocock/skills, <a href="https://github.com/mattpocock/skills">README</a></cite>
+</blockquote>
+<p>Frameworks own your process and hide their bugs. Skills hand you a stack of short, readable prompts you can edit. Install them with:</p>
+<pre><code>npx skills@latest add mattpocock/skills</code></pre>
+
+<h2 id="axis">The one axis that organises everything</h2>
+<p>Every skill splits on a single question: <strong>who is allowed to invoke it?</strong></p>
+
+<table>
+<thead><tr><th>Kind</th><th>Invoked by</th><th>Job</th><th>Examples</th></tr></thead>
+<tbody>
+<tr><td><span class="tag user">user-invoked</span></td><td>only you, typing <code>/name</code></td><td>orchestrate a flow</td><td><code>/grill-me</code>, <code>/triage</code>, <code>/to-prd</code></td></tr>
+<tr><td><span class="tag model">model-invoked</span></td><td>you <em>or</em> the agent, automatically</td><td>hold reusable discipline</td><td><code>tdd</code>, <code>diagnosing-bugs</code>, <code>domain-modeling</code></td></tr>
+</tbody>
+</table>
+
+<p>The mechanism is one frontmatter line. <code>disable-model-invocation: true</code> makes a skill user-only. The <a href="../reference/glossary.html#composition-rule">composition rule</a>:</p>
+<blockquote>A user-invoked skill may invoke model-invoked skills, but never another user-invoked one.<cite>— README, Reference section</cite></blockquote>
+<p>This keeps orchestration <em>flat</em>: one conductor (the slash command you typed) calling reusable players (the disciplines). No nested conductors fighting for control of the conversation.</p>
+
+<h2 id="failures">The four failure modes they fight</h2>
+<p>Matt frames the whole repo as a response to four ways agents disappoint you. This is the "why" behind every skill — learn it and the catalogue organises itself.</p>
+
+<table>
+<thead><tr><th>#</th><th>Failure mode</th><th>Root cause</th><th>The fix (skill)</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>"Didn't do what I want"</td><td>misalignment — you didn't fully say it; the agent didn't fully ask</td><td><span class="tag user">grill-me</span> / <span class="tag user">grill-with-docs</span></td></tr>
+<tr><td>2</td><td>"Way too verbose"</td><td>no shared language — agent reinvents jargon every session</td><td><code>CONTEXT.md</code> via <span class="tag user">grill-with-docs</span> + <span class="tag model">domain-modeling</span></td></tr>
+<tr><td>3</td><td>"The code doesn't work"</td><td>no feedback loop — agent flies blind</td><td><span class="tag model">tdd</span>, <span class="tag model">diagnosing-bugs</span></td></tr>
+<tr><td>4</td><td>"We built a ball of mud"</td><td>entropy — agents accelerate complexity</td><td><span class="tag user">improve-codebase-architecture</span> + <span class="tag model">codebase-design</span></td></tr>
+</tbody>
+</table>
+
+<div class="note">
+<span class="label">The big idea behind #2</span>
+A shared glossary lets the agent say <em>"a problem with the materialization cascade"</em> instead of <em>"a problem when a lesson inside a section of a course is made real."</em> Same meaning, a fraction of the tokens — every session. Matt calls this possibly the single coolest technique in the repo.
+</div>
+
+<h2 id="flow">How it fits: the daily flow</h2>
+<p>The skills chain into one loop, from idea to merged code. Each stage feeds the next:</p>
+
+<div class="diagram">  align ─────────► plan ──────► slice ───────► build ──────────► maintain
+  /grill-with-docs  /to-prd     /to-issues     /implement        /improve-codebase-architecture
+  builds CONTEXT.md             vertical       │
+  + ADRs while you              slices →       ├─ uses  tdd            (model-invoked)
+  get interviewed               grabbable      ├─ uses  diagnosing-bugs (model-invoked)
+                                issues         └─ calls /review, then commits</div>
+
+<p>Notice the <strong>build</strong> stage is itself the axis in miniature: <span class="tag user">/implement</span> is the conductor — it takes the PRD/issues, drives the work, then runs <code>/review</code> and commits. It <em>reaches for</em> <span class="tag model">tdd</span> at pre-agreed seams and <span class="tag model">diagnosing-bugs</span> when something breaks. One conductor, reusable players — the <a href="../reference/glossary.html#composition-rule">composition rule</a> at work. (Run <code>/tdd</code> directly only for a quick one-feature loop with no PRD.)</p>
+
+<p>One stage is missing from that picture because it runs <em>before</em> the loop ever starts: <span class="tag user">setup-matt-pocock-skills</span>. It writes the per-repo config the other skills assume. That's <a href="0002-setup-skill-dissected.html">Lesson 2</a>.</p>
+
+<h2 id="check">Check yourself</h2>
+<div class="quiz" data-answer="1">
+  <p class="q">Why can't a user-invoked skill call another user-invoked skill?</p>
+  <button>To make the repo install faster for you</button>
+  <button>To keep the orchestration of AI behaviors flat and predictable</button>
+  <button>To stop any model from reading it</button>
+  <p class="explain" hidden>Flat orchestration: the slash command you type is the single conductor; it may call reusable model-invoked disciplines, never a second conductor.</p>
+</div>
+
+<div class="quiz" data-answer="2">
+  <p class="q">What single line makes a skill user-invoked only?</p>
+  <button>name set in the frontmatter</button>
+  <button>argument-hint in the frontmatter</button>
+  <button>disable-model-invocation true</button>
+  <p class="explain" hidden>disable-model-invocation: true tells the agent never to auto-reach for the skill — you must type its slash command.</p>
+</div>
+
+<div class="primary-source">
+<span class="label">Primary source — read this next</span>
+The <a href="https://github.com/mattpocock/skills/blob/main/README.md">mattpocock/skills README</a>. Highest-trust source: it's Matt's own framing of the four failure modes, with the book quotes that ground each one.
+</div>
+
+<p class="ask-teacher">Confused by anything here? Ask me — I'm your teacher for this course, not just the page.</p>
+
+<div class="lesson-nav">
+  <span>● Lesson 1 of 2</span>
+  <a href="0002-setup-skill-dissected.html">Next → Lesson 2: the setup skill, dissected</a>
+</div>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference — Matt Pocock Skills Glossary</title>
+<link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+
+<p class="eyebrow">Reference · Glossary</p>
+<h1>Skills system glossary</h1>
+<p class="dek">The shared vocabulary for this course. Once a term is defined here, every lesson uses it the same way. Print this; keep it beside you.</p>
+
+<h2 id="skill">Skill</h2>
+<p>A folder holding a <code>SKILL.md</code> (YAML frontmatter + instruction body) and optional bundled files. Loaded into the agent's context to steer one task. Not code; not a framework.</p>
+
+<h2 id="user-invoked">User-invoked skill</h2>
+<p>Runs only when <em>you</em> type <code>/name</code>. Job: orchestrate a flow. Marked with <code>disable-model-invocation: true</code>. E.g. <code>/grill-me</code>, <code>/triage</code>, <code>/setup-matt-pocock-skills</code>.</p>
+
+<h2 id="model-invoked">Model-invoked skill</h2>
+<p>Can be triggered by you <em>or</em> reached for automatically by the agent when the task fits. Job: hold reusable discipline. E.g. <code>tdd</code>, <code>diagnosing-bugs</code>, <code>domain-modeling</code>.</p>
+
+<h2 id="composition-rule">Composition rule</h2>
+<p>A user-invoked skill may invoke model-invoked skills, but <strong>never</strong> another user-invoked one. Keeps orchestration flat — one conductor per flow.</p>
+
+<h2 id="progressive-disclosure">Progressive disclosure</h2>
+<p>The agent sees only each skill's <code>description</code> until one matches; only then is the full body (and its bundled files) loaded. Keeps context cheap. Why the description must say <em>what + when</em>.</p>
+
+<h2 id="bundled-resource">Bundled resource / seed template</h2>
+<p>An extra file in a skill folder, referenced by relative link in the body and read only when needed. Setup's five <code>.md</code> templates are seed content copied into your repo.</p>
+
+<h2 id="frontmatter">Frontmatter</h2>
+<p>The YAML block at the top of <code>SKILL.md</code>: <code>name</code> (→ slash command), <code>description</code> (relevance signal), optional <code>disable-model-invocation</code>, <code>argument-hint</code>.</p>
+
+<h2 id="issue-tracker">Issue tracker config</h2>
+<p><code>docs/agents/issue-tracker.md</code> — where issues live (GitHub / GitLab / local markdown / other) and the concrete commands to use. Read by <code>/triage</code>, <code>/to-issues</code>, <code>/to-prd</code>.</p>
+
+<h2 id="prs-as-surface">PRs as a request surface</h2>
+<p>A yes/no flag in the issue-tracker config. If yes, <code>/triage</code> pulls <em>external</em> pull requests into the same queue and labels as issues.</p>
+
+<h2 id="triage-labels">Triage labels</h2>
+<p><code>docs/agents/triage-labels.md</code> — a mapping from five canonical roles to your repo's real label strings, so <code>/triage</code> applies existing labels instead of creating duplicates.</p>
+
+<h2 id="five-roles">The five triage roles</h2>
+<table>
+<thead><tr><th>Role</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>needs-triage</code></td><td>maintainer must evaluate</td></tr>
+<tr><td><code>needs-info</code></td><td>waiting on the reporter</td></tr>
+<tr><td><code>ready-for-agent</code></td><td>fully specified, AFK-ready</td></tr>
+<tr><td><code>ready-for-human</code></td><td>needs a human to implement</td></tr>
+<tr><td><code>wontfix</code></td><td>will not be actioned</td></tr>
+</tbody>
+</table>
+
+<h2 id="ready-for-agent">ready-for-agent</h2>
+<p>The pipeline's endgame: an issue specified completely enough that an away-from-keyboard autonomous agent can pick it up with zero additional human context.</p>
+
+<h2 id="domain-docs">Domain docs config</h2>
+<p><code>docs/agents/domain.md</code> — tells skills to read <code>CONTEXT.md</code> + <code>docs/adr/</code> before exploring, and whether the repo is single- or multi-context.</p>
+
+<h2 id="context-md"><code>CONTEXT.md</code></h2>
+<p>The project's glossary / ubiquitous language. Lets the agent name concepts concisely and consistently. Created lazily by <code>/domain-modeling</code>, not upfront.</p>
+
+<h2 id="adr">ADR (Architectural Decision Record)</h2>
+<p>A dated note under <code>docs/adr/</code> capturing one non-obvious decision and its reasoning. Skills must flag, not silently override, conflicts with an existing ADR.</p>
+
+<h2 id="single-multi-context">Single- vs multi-context</h2>
+<p>Single: one <code>CONTEXT.md</code> at root (most repos). Multi: <code>CONTEXT-MAP.md</code> at root pointing to per-context <code>CONTEXT.md</code> files (monorepos).</p>
+
+<h2 id="prd">PRD (to-prd)</h2>
+<p>Product Requirements Doc. <code>/to-prd</code> (<span class="tag user">user-invoked</span>) <em>synthesises</em> the current conversation into a PRD — no interview — and publishes it to the tracker with the <code>ready-for-agent</code> label. Records decisions (problem, solution, user stories, implementation/testing decisions, scope); bans file paths and code snippets.</p>
+
+<h2 id="seam">Seam <em>(Feathers)</em></h2>
+<p>A place where you can alter behaviour without editing in that place — where a module's interface lives. For testing: prefer existing seams, use the highest possible, fewer is better (ideal: one). Chosen in <code>to-prd</code> step 2; <code>tdd</code> tests at these seams. <em>Avoid:</em> "boundary" (overloaded with DDD).</p>
+
+<h2 id="module">Module / Interface / Implementation</h2>
+<p><strong>Module</strong> — anything with an interface + implementation (fn, class, package, slice); scale-agnostic. <strong>Interface</strong> — <em>everything</em> a caller must know (types, invariants, ordering, error modes, perf), not just the signature. <strong>Implementation</strong> — what's inside. <em>Avoid:</em> component, service, API.</p>
+
+<h2 id="depth">Depth (deep vs shallow)</h2>
+<p>Leverage at the interface: behaviour exercised per unit of interface learned. <strong>Deep</strong> = lots of behaviour behind a small interface (goal). <strong>Shallow</strong> = interface nearly as complex as implementation (avoid). Not the impl-lines÷interface-lines ratio — that rewards padding.</p>
+
+<h2 id="leverage-locality">Leverage / Locality</h2>
+<p><strong>Leverage</strong> — what callers gain from depth: more capability per unit of interface learned. <strong>Locality</strong> — what maintainers gain: change, bugs, knowledge concentrate in one place. Fix once, fixed everywhere.</p>
+
+<h2 id="adapter">Adapter</h2>
+<p>A concrete thing satisfying an interface at a seam — describes <em>role</em> (what slot it fills), not substance. Rule: one adapter = a hypothetical seam; two = a real one.</p>
+
+<h2 id="deletion-test">The deletion test</h2>
+<p>Imagine deleting a module. If complexity vanishes → it was a shallow pass-through. If complexity reappears across N callers → it was earning its keep (deep). "Concentrates complexity" is the good signal.</p>
+
+<h2 id="improve-arch">improve-codebase-architecture</h2>
+<p>The maintain-stage <span class="tag user">user-invoked</span> orchestrator. Scans for deepening opportunities, presents a visual HTML report (Tailwind+Mermaid, before/after, strength badges) to the temp dir, then runs <code>/grilling</code> + <code>/domain-modeling</code> on the candidate you pick. Built on <code>codebase-design</code> vocabulary; informed by <code>CONTEXT.md</code> + ADRs.</p>
+
+<h2 id="vertical-slice">Vertical slice / tracer bullet (to-issues)</h2>
+<p>An issue that cuts a thin, complete path through <em>every</em> layer (schema→API→UI→tests), demoable on its own — not a horizontal slice of one layer. <code>/to-issues</code> breaks a PRD into these, quizzes you on granularity/dependencies, then publishes in dependency order tagged <code>ready-for-agent</code>.</p>
+
+<h2 id="prefactor">Prefactor</h2>
+<p>"Make the change easy, then make the easy change." Restructuring done <em>first</em> (as its own slice) so the real change becomes simple.</p>
+
+<h2 id="implement">implement</h2>
+<p>The build-stage orchestrator (<span class="tag user">user-invoked</span>). Takes a PRD or set of issues, drives the implementation, runs typecheck + tests, then calls <code>/review</code> and commits. Reaches for <a href="#tdd-skill"><code>tdd</code></a> at pre-agreed seams and <code>diagnosing-bugs</code> when things break. Run <code>/tdd</code> directly only for a quick single-feature loop without a PRD.</p>
+
+<h2 id="tdd-skill">tdd</h2>
+<p>A <span class="tag model">model-invoked</span> discipline: red-green-refactor, one vertical slice at a time. Reached <em>by</em> <code>/implement</code>, not a stage on its own.</p>
+
+<h2 id="grilling">Grilling</h2>
+<p>A relentless interview the agent runs to close the alignment gap before building. The reusable loop behind <code>/grill-me</code> and <code>/grill-with-docs</code>. Rules: tree-structured, one question at a time, always recommend an answer, explore code before asking.</p>
+
+<h2 id="grill-with-docs">grill-with-docs</h2>
+<p>The align-stage <span class="tag user">user-invoked</span> orchestrator. Body is one line: run <code>/grilling</code> using <code>/domain-modeling</code>. Closes failure modes #1 (alignment) and #2 (shared language) in one session.</p>
+
+<h2 id="domain-modeling-skill">domain-modeling</h2>
+<p>The <em>active</em> <span class="tag model">model-invoked</span> discipline that changes the model: challenges terms, sharpens fuzzy language, stress-tests with scenarios, cross-references code, and writes <code>CONTEXT.md</code> + ADRs inline. Distinct from merely <em>reading</em> the glossary.</p>
+
+<h2 id="lazy-creation">Lazy creation</h2>
+<p>Domain docs are created the moment a term or decision crystallises — never upfront. No <code>CONTEXT.md</code> until the first term resolves; no <code>docs/adr/</code> until the first ADR is warranted.</p>
+
+<h2 id="adr-gate">The ADR three-gate</h2>
+<p>Offer an ADR only when <em>all three</em> hold: hard to reverse, surprising without context, the result of a real trade-off. Miss one → skip it.</p>
+
+<h2 id="ask-matt">ask-matt</h2>
+<p>A <span class="tag user">user-invoked</span> <strong>router</strong> over the other user-invoked skills — no process, no code, just a map of how they connect. Invoke when you forget which skill fits. Lists only navigable (user-invoked) skills; model-invoked reflexes are absent by design.</p>
+
+<h2 id="flow">Flow</h2>
+<p>A path through the skills. The system has one <a href="#main-flow"><em>main flow</em></a>, two <a href="#on-ramp">on-ramps</a> that merge onto it, and standalone skills off it entirely.</p>
+
+<h2 id="main-flow">Main flow (idea → ship)</h2>
+<p>The route most work travels: <code>/grill-with-docs</code> → (optional <a href="#prototype">prototype</a> detour) → branch on multi-session → <code>/to-prd</code> → <code>/to-issues</code> → <code>/implement</code> ×N, or <code>/implement</code> in place.</p>
+
+<h2 id="on-ramp">On-ramp</h2>
+<p>A starting situation that <em>generates</em> work, then merges onto the main flow. Two of them: <code>/triage</code> (raw bugs/requests you didn't create) and <code>/improve-codebase-architecture</code> (surfaces a deepening idea).</p>
+
+<h2 id="smart-zone">Smart zone</h2>
+<p>The context window (~120k tokens on SOTA models) within which the model still reasons sharply. Keep grill→prd→issues inside one smart zone; <code>/handoff</code> before you exceed it rather than push on a degraded model.</p>
+
+<h2 id="handoff">handoff vs compact</h2>
+<p><code>/handoff</code> writes the thread to a markdown file so you continue in a <strong>new</strong> session (it <em>forks</em>). <code>/compact</code> (built-in) summarises earlier turns in place, same conversation (it <em>continues</em>). Use handoff to branch off (e.g. into a prototype); compact at clean phase breaks.</p>
+
+<h2 id="prototype">prototype</h2>
+<p>A <span class="tag user">user-invoked</span> detour off the main flow: <strong>throwaway code that answers one question</strong>. Two branches — a terminal app (logic/state) or several toggleable UI variants. Throwaway from day one; keep only the <em>answer</em>.</p>
+
+<h2 id="authoring-terms">— Authoring (writing-great-skills) —</h2>
+<p class="dek">From here down: the vocabulary for <em>writing</em> skills, not just using them. Source: the <code>writing-great-skills</code> SKILL.md + GLOSSARY.md.</p>
+
+<h2 id="predictability">Predictability</h2>
+<p>The root virtue of a skill: the agent takes the same <em>process</em> every run — <strong>not</strong> the same output. A brainstorm skill should predictably <em>diverge</em>. Every other authoring lever serves this. <em>Avoid:</em> consistency, reliability, robustness, output-determinism.</p>
+
+<h2 id="context-load">Context load</h2>
+<p>The cost a <span class="tag model">model-invoked</span> skill imposes on the <strong>model</strong>: its <code>description</code> sits in the window every turn, spending tokens <em>and</em> attention. The brake on splitting into more model-invoked skills. <em>Avoid:</em> token cost, context bloat.</p>
+
+<h2 id="cognitive-load">Cognitive load</h2>
+<p>The cost a <span class="tag user">user-invoked</span> skill imposes on the <strong>human</strong>: remembering it exists and when to reach for it (you are the index). Not a cost to zero out — it's the price of human agency. The brake on splitting into more user-invoked skills. <em>Avoid:</em> burden, overhead.</p>
+
+<h2 id="router-skill">Router skill</h2>
+<p>A <span class="tag user">user-invoked</span> skill that names your other user-invoked skills and when to reach for each — one name to remember instead of many. The cure for piled-up <a href="#cognitive-load">cognitive load</a>. It can only hint, never fire them (they have no description). E.g. <a href="#ask-matt"><code>ask-matt</code></a>. <em>Avoid:</em> dispatcher, menu, registry.</p>
+
+<div class="lesson-nav">
+  <a href="../lessons/0008-predictability-and-the-two-loads.html">← Lesson 8</a>
+  <a href="../lessons/0001-the-skills-system-mental-model.html">Lesson 1</a>
+</div>
+
+</body>
+</html>
