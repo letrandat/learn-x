@@ -1,0 +1,133 @@
+/* Neogit Learning — Shared stylesheet */
+/* Tufte-inspired: clean, readable, printable */
+
+:root {
+  --bg: #fffff8;
+  --text: #111;
+  --muted: #666;
+  --accent: #2e6da4;
+  --accent-bg: #ecf3f9;
+  --code-bg: #f5f5f0;
+  --border: #ddd;
+  --green: #2e7d32;
+  --red: #c62828;
+  --orange: #e65100;
+  --width: 720px;
+  --font: 'Iowan Old Style', 'Palatino', 'Georgia', serif;
+  --mono: 'SFMono-Regular', 'Fira Code', 'Consolas', monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a1a;
+    --text: #e0e0e0;
+    --muted: #999;
+    --accent: #5fa3d9;
+    --accent-bg: #1e2a35;
+    --code-bg: #252525;
+    --border: #333;
+    --green: #66bb6a;
+    --red: #ef5350;
+    --orange: #ff9800;
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.6;
+  padding: 2rem 1.5rem;
+  max-width: var(--width);
+  margin: 0 auto;
+}
+
+h1, h2, h3 { line-height: 1.2; margin-top: 2rem; margin-bottom: 0.75rem; }
+h1 { font-size: 1.8rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+h2 { font-size: 1.3rem; }
+h3 { font-size: 1.1rem; }
+
+p, ul, ol { margin-bottom: 1rem; }
+li { margin-bottom: 0.25rem; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+code, kbd, samp {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  background: var(--code-bg);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+}
+
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+kbd {
+  font-size: 0.8em;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  padding: 0.15em 0.4em;
+}
+
+blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 1rem;
+  color: var(--muted);
+  margin: 1rem 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+th, td {
+  text-align: left;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+th { font-weight: 600; }
+
+.callout {
+  background: var(--accent-bg);
+  border-left: 3px solid var(--accent);
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin: 1rem 0;
+}
+.callout strong { color: var(--accent); }
+
+.lesson-meta {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+.followup {
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+@media print {
+  body { font-size: 11pt; line-height: 1.4; }
+  .followup { display: none; }
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neogit Status Buffer — Quick Reference</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<style>
+  body { max-width: 960px; }
+  .cmd { font-family: var(--mono); font-size: 0.85rem; color: var(--muted); }
+  .keycol { white-space: nowrap; }
+  h2 { margin-top: 1rem; }
+</style>
+</head>
+<body>
+
+<h1>Neogit Status Buffer — Quick Reference</h1>
+<p class="lesson-meta">Print-friendly. Every key, every git command.</p>
+
+<h2>Navigation</h2>
+<table>
+  <tr><th class="keycol">Key</th><th>Action</th></tr>
+  <tr><td><kbd>j</kbd> / <kbd>k</kbd></td><td>Move down / up</td></tr>
+  <tr><td><kbd>}</kbd> / <kbd>{</kbd></td><td>Next / previous hunk header</td></tr>
+  <tr><td><kbd>&lt;Tab&gt;</kbd></td><td>Toggle expand/collapse</td></tr>
+  <tr><td><kbd>1</kbd>-<kbd>4</kbd></td><td>Set depth level (filenames → full diff)</td></tr>
+  <tr><td><kbd>&lt;CR&gt;</kbd></td><td>Open file under cursor</td></tr>
+</table>
+
+<h2>Staging / Unstaging</h2>
+<table>
+  <tr><th>Key</th><th>Action</th><th class="cmd">Git CLI</th></tr>
+  <tr><td><kbd>s</kbd></td><td>Stage item under cursor</td><td class="cmd">git add &lt;file&gt;</td></tr>
+  <tr><td><kbd>u</kbd></td><td>Unstage item under cursor</td><td class="cmd">git restore --staged &lt;file&gt;</td></tr>
+  <tr><td><kbd>S</kbd></td><td>Stage all unstaged</td><td class="cmd">git add .</td></tr>
+  <tr><td><kbd>U</kbd></td><td>Unstage all staged</td><td class="cmd">git restore --staged .</td></tr>
+  <tr><td><kbd>&lt;C-s&gt;</kbd></td><td>Stage all (incl. untracked)</td><td class="cmd">git add -A</td></tr>
+  <tr><td><kbd>K</kbd></td><td>Untrack (remove from git tracking)</td><td class="cmd">git rm --cached</td></tr>
+  <tr><td><kbd>x</kbd></td><td>Discard changes (⚠️ destructive)</td><td class="cmd">git restore &lt;file&gt;</td></tr>
+</table>
+
+<h2>Popups (mnemonic keys)</h2>
+<table>
+  <tr><th>Key</th><th>Popup</th><th>Key actions</th></tr>
+  <tr><td><kbd>c</kbd></td><td>Commit</td><td><kbd>c</kbd> commit, <kbd>a</kbd> amend, <kbd>w</kbd> reword</td></tr>
+  <tr><td><kbd>b</kbd></td><td>Branch</td><td><kbd>b</kbd> checkout, <kbd>c</kbd> create, <kbd>d</kbd> delete, <kbd>m</kbd> rename</td></tr>
+  <tr><td><kbd>P</kbd></td><td>Push</td><td><kbd>p</kbd> push, <kbd>-u</kbd> set upstream</td></tr>
+  <tr><td><kbd>p</kbd></td><td>Pull</td><td><kbd>p</kbd> pull, <kbd>r</kbd> rebase pull, <kbd>f</kbd> fetch</td></tr>
+  <tr><td><kbd>f</kbd></td><td>Fetch</td><td><kbd>f</kbd> fetch, <kbd>a</kbd> all remotes</td></tr>
+  <tr><td><kbd>m</kbd></td><td>Merge</td><td><kbd>m</kbd> merge</td></tr>
+  <tr><td><kbd>r</kbd></td><td>Rebase</td><td><kbd>r</kbd> rebase, <kbd>i</kbd> interactive, <kbd>s</kbd> skip</td></tr>
+  <tr><td><kbd>Z</kbd></td><td>Stash</td><td><kbd>z</kbd> stash, <kbd>i</kbd> index only, <kbd>p</kbd> pop</td></tr>
+  <tr><td><kbd>v</kbd></td><td>Revert</td><td><kbd>v</kbd> revert commit</td></tr>
+  <tr><td><kbd>A</kbd></td><td>Cherry-pick</td><td><kbd>p</kbd> pick, <kbd>a</kbd> apply</td></tr>
+  <tr><td><kbd>X</kbd></td><td>Reset</td><td><kbd>s</kbd> soft, <kbd>m</kbd> mixed, <kbd>h</kbd> hard</td></tr>
+  <tr><td><kbd>d</kbd></td><td>Diff</td><td><kbd>r</kbd> range, <kbd>w</kbd> worktree vs index</td></tr>
+  <tr><td><kbd>l</kbd></td><td>Log</td><td><kbd>l</kbd> log, <kbd>g</kbd> graph</td></tr>
+  <tr><td><kbd>t</kbd></td><td>Tag</td><td><kbd>t</kbd> create tag</td></tr>
+  <tr><td><kbd>M</kbd></td><td>Remote</td><td><kbd>a</kbd> add, <kbd>r</kbd> rename, <kbd>d</kbd> delete</td></tr>
+</table>
+
+<h2>Diagnostics</h2>
+<table>
+  <tr><th>Key</th><th>Action</th></tr>
+  <tr><td><kbd>$</kbd></td><td>Command history — see every git CLI call neogit makes</td></tr>
+  <tr><td><kbd>y</kbd></td><td>Show refs (all branches, tags)</td></tr>
+  <tr><td><kbd>&lt;C-r&gt;</kbd></td><td>Refresh buffer</td></tr>
+</table>
+
+<h2>Commit editor shortcuts</h2>
+<table>
+  <tr><th>Key</th><th>Action</th></tr>
+  <tr><td><kbd>&lt;C-c&gt;&lt;C-c&gt;</kbd></td><td>Submit commit (write & close)</td></tr>
+  <tr><td><kbd>&lt;C-c&gt;&lt;C-k&gt;</kbd></td><td>Abort commit</td></tr>
+  <tr><td><kbd>&lt;C-p&gt;</kbd></td><td>Previous commit message</td></tr>
+  <tr><td><kbd>&lt;C-n&gt;</kbd></td><td>Next commit message</td></tr>
+</table>
+
+</body>
+</html>

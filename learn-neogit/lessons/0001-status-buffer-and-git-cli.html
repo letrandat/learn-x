@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>001: The Status Buffer — Where neogit meets git CLI</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<meta name="color-scheme" content="light dark">
+</head>
+<body>
+
+<h1>001: The Status Buffer — Where neogit meets git CLI</h1>
+<p class="lesson-meta">Goal: Open neogit, read the status buffer, and see the git CLI behind every action.</p>
+
+<h2>Open neogit</h2>
+<p>
+  From any git repo, run:
+</p>
+<pre><code>:Neogit</code></pre>
+<p>
+  Or if you have a keybind, use that. You'll see the <strong>status buffer</strong> —
+  neogit's main view.
+</p>
+
+<h2>The status buffer anatomy</h2>
+<p>The status buffer is an interactive <code>git status</code>. Sections, top to bottom:</p>
+<table>
+  <tr><th>Section</th><th>Git CLI equivalent</th><th>What it shows</th></tr>
+  <tr><td><strong>HEAD</strong></td><td><code>git branch -vv</code></td><td>Current branch, upstream, ahead/behind counts</td></tr>
+  <tr><td>Untracked</td><td><code>git status --porcelain</code> (<code>??</code>)</td><td>Files git doesn't know about</td></tr>
+  <tr><td>Unstaged</td><td><code>git diff</code></td><td>Modified files not yet staged</td></tr>
+  <tr><td>Staged</td><td><code>git diff --cached</code></td><td>Files added to the index, ready to commit</td></tr>
+  <tr><td>Stashes</td><td><code>git stash list</code></td><td>Saved work-in-progress snapshots</td></tr>
+  <tr><td>Unpushed</td><td><code>git log @{upstream}..HEAD</code></td><td>Commits you have that the remote doesn't</td></tr>
+  <tr><td>Unpulled</td><td><code>git log HEAD..@{upstream}</code></td><td>Commits the remote has that you don't</td></tr>
+  <tr><td>Recent</td><td><code>git log --oneline -10</code></td><td>Last 10 commits on this branch</td></tr>
+</table>
+
+<div class="callout">
+  <strong>Core insight:</strong> Every section of the status buffer <em>is</em> output from a git CLI command.
+  neogit isn't hiding git — it's rendering git's output in an actionable UI.
+</div>
+
+<h2>Two essential diagnostic keys</h2>
+
+<h3><kbd>$</kbd> — Command History</h3>
+<p>Press <kbd>$</kbd> in the status buffer. You'll see every git command neogit has run this session:
+exact CLI invocations, exit codes, and timing. This is your <strong>direct window into git CLI</strong>.</p>
+
+<h3><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> — Depth Control</h3>
+<p>Press <kbd>1</kbd> to collapse all sections to top level (filenames only).
+<kbd>2</kbd> shows files and section headers. <kbd>3</kbd> shows hunks. <kbd>4</kbd> shows full diff.
+Each depth level corresponds to the detail you'd get from different <code>git diff</code> flags.</p>
+
+<h2>Exercise: Stage + Commit, watching the CLI</h2>
+<ol>
+  <li>Make a change to any file in a repo (or <code>touch test.md</code> for a new file)</li>
+  <li>Open neogit: <code>:Neogit</code></li>
+  <li>Press <kbd>$</kbd> — see <code>git status</code> and <code>git diff</code> in the history</li>
+  <li>Close history (<kbd>q</kbd>), move cursor to your file, press <kbd>s</kbd> to stage</li>
+  <li>Press <kbd>$</kbd> again — see <code>git add</code> (or <code>git add -N</code> for new files)</li>
+  <li>Close history, press <kbd>c</kbd> <kbd>c</kbd> to commit</li>
+  <li>Write a message, save, close the commit buffer (<code>:wq</code>)</li>
+  <li>Press <kbd>$</kbd> — see <code>git commit</code> with your message</li>
+</ol>
+
+<div class="callout">
+  <strong>Compare with lazygit:</strong> In lazygit, git commands run invisibly unless you open a log panel.
+  In neogit, <kbd>$</kbd> shows every command by default. The philosophy: <strong>transparency builds understanding</strong>.
+</div>
+
+<h2>Keybind cheat sheet (status buffer)</h2>
+<table>
+  <tr><th>Key</th><th>Action</th><th>Git CLI</th></tr>
+  <tr><td><kbd>s</kbd></td><td>Stage item under cursor</td><td><code>git add &lt;file&gt;</code></td></tr>
+  <tr><td><kbd>u</kbd></td><td>Unstage item under cursor</td><td><code>git restore --staged &lt;file&gt;</code></td></tr>
+  <tr><td><kbd>S</kbd></td><td>Stage all unstaged</td><td><code>git add .</code></td></tr>
+  <tr><td><kbd>U</kbd></td><td>Unstage all staged</td><td><code>git restore --staged .</code></td></tr>
+  <tr><td><kbd>x</kbd></td><td>Discard changes (⚠️ destructive)</td><td><code>git restore &lt;file&gt;</code></td></tr>
+  <tr><td><kbd>c</kbd> <kbd>c</kbd></td><td>Commit</td><td><code>git commit</code></td></tr>
+  <tr><td><kbd>Tab</kbd></td><td>Toggle expand/collapse</td><td>—</td></tr>
+  <tr><td><kbd>$</kbd></td><td>Show command history</td><td>—</td></tr>
+  <tr><td><kbd>q</kbd></td><td>Close neogit</td><td>—</td></tr>
+</table>
+
+<h2>Where to go next</h2>
+<ul>
+  <li>Browse the <a href="../GLOSSARY.md">Glossary</a> for any unfamiliar terms</li>
+  <li>Practice the stage/unstage/commit cycle until it's automatic</li>
+  <li>Open the command history every few actions — build the habit of seeing the CLI</li>
+</ul>
+
+<h2>Primary source</h2>
+<p>
+  <a href="https://github.com/NeogitOrg/neogit/blob/master/doc/neogit.txt">neogit.txt (official docs)</a>
+  — the status buffer mappings and popup reference.
+</p>
+
+<div class="followup">
+  <strong>Questions?</strong> Ask me anything — I'm your teacher.<br>
+  Stuck on a keybind? Want to see a specific git CLI command explained? Just ask.
+</div>
+
+</body>
+</html>
