@@ -170,3 +170,53 @@ th { font-weight: 600; }
   margin-left: auto;
 }
 
+/* Quiz Answer Collapsible */
+details.quiz-answer {
+  margin: 1rem 0;
+}
+details.quiz-answer summary {
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 500;
+  width: fit-content;
+  user-select: none;
+  transition: all 0.2s ease-in-out;
+}
+details.quiz-answer summary:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+details.quiz-answer[open] summary {
+  margin-bottom: 0.75rem;
+}
+
+/* Quiz styling */
+.quiz {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1.5rem 0;
+}
+.quiz p {
+  margin-bottom: 0.75rem;
+}
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.options label {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+
