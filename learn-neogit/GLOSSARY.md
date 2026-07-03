@@ -37,6 +37,23 @@ A transient menu in neogit opened by a mnemonic key (e.g. `c` for commit, `b` fo
 **Hunk**:
 A contiguous block of changed lines in a file. neogit lets you stage/unstage individual hunks or even lines within a hunk.
 
+## Staging workflow
+
+**Index (staging area)**:
+The intermediate layer between your working tree and commits. Changes must be staged (added to the index) before committing.
+
+**Staging**:
+Adding changes to the index. In neogit: <kbd>s</kbd> (stage item), <kbd>S</kbd> (stage all), <kbd>C-s</kbd> (stage all including untracked).
+CLI equivalent: <code>git add</code>, <code>git add .</code>, <code>git add -A</code>
+
+**Unstaging**:
+Removing changes from the index while keeping them in the working tree. In neogit: <kbd>u</kbd> (unstage item), <kbd>U</kbd> (unstage all).
+CLI equivalent: <code>git restore --staged &lt;file&gt;</code>
+
+**Hunk**:
+A contiguous block of changed lines. Stage/unstage individual hunks with <kbd>Tab</kbd> to expand, then <kbd>s</kbd> or <kbd>u</kbd>.
+CLI equivalent: <code>git add -p</code> (interactive patch mode)
+
 ## Neogit keybinding patterns
 
 **Popups** (single mnemonic keys, opened from status buffer):
