@@ -3,27 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>003: Hunk and Line Staging — Surgical Git Precision</title>
+<title>003: Hunk Staging and Reversing Selected Lines</title>
 <link rel="stylesheet" href="../assets/lesson.css">
 <meta name="color-scheme" content="light dark">
 </head>
 <body>
 
-<h1>003: Hunk and Line Staging — Surgical Git Precision</h1>
-<p class="lesson-meta">Goal: Master staging and unstaging individual hunks and specific lines in neogit, and see how they map to git CLI patch options.</p>
+<h1>003: Hunk Staging and Reversing Selected Lines</h1>
+<p class="lesson-meta">Goal: Master staging and unstaging individual hunks in neogit, and see how to reverse specific lines using visual selection.</p>
 
 <h2>The Power of Partial Staging</h2>
 <p>
-  Imagine you have been working on a file for an hour. You have added a feature, updated the documentation, and inserted several <code>console.log()</code> statements for debugging. 
+  Imagine you have been working on a file for an hour. You have added a feature, updated the documentation, and inserted several <code>console.log()</code> statements for debugging.
 </p>
 <p>
-  If you stage the entire file, you commit your debug noise alongside the clean code. If you don't stage it, you can't commit the new feature. 
-  This is where <strong>partial staging</strong> shines: you can stage only the hunks or lines representing the feature, leaving the debug logs unstaged in your working tree.
+  If you stage the entire file, you commit your debug noise alongside the clean code. If you don't stage it, you can't commit the new feature.
+  This is where <strong>partial staging</strong> shines: you can stage only the hunks representing the feature, leaving the debug logs unstaged in your working tree.
 </p>
 
 <div class="callout">
-  <strong>Key concept:</strong> A <strong>hunk</strong> is a contiguous block of changed lines. 
-  By staging at the hunk or line level, you curate precise, readable commits.
+  <strong>Key concept:</strong> A <strong>hunk</strong> is a contiguous block of changed lines.
+  By staging at the hunk level, you curate precise, readable commits.
 </div>
 
 <h2>Hunk Staging in neogit</h2>
@@ -33,7 +33,7 @@
 
 <h3>1. Expanding file diffs</h3>
 <p>
-  Move your cursor to an unstaged file in the status buffer and press <kbd>Tab</kbd> to expand it. 
+  Move your cursor to an unstaged file in the status buffer and press <kbd>Tab</kbd> to expand it.
   You can also press <kbd>4</kbd> to expand all file diffs in the buffer at once.
 </p>
 
@@ -48,38 +48,38 @@
 
 <h3>3. Staging and unstaging a hunk</h3>
 <p>
-  Position your cursor anywhere within a hunk (or on its header) and press:
+  Position your cursor anywhere within a hunk (or on its header) in normal mode and press:
 </p>
 <ul>
-  <li><kbd>s</kbd> to stage the hunk.</li>
-  <li><kbd>u</kbd> to unstage the hunk.</li>
+  <li><kbd>s</kbd> to stage the hunk under the cursor.</li>
+  <li><kbd>u</kbd> to unstage the hunk under the cursor.</li>
 </ul>
 <p class="cli-equivalent">CLI equivalents: <code>git add -p &lt;file&gt;</code> (interactive staging) and <code>git restore --staged -p &lt;file&gt;</code> (interactive unstaging)</p>
 
-<h2>Line-level Staging: Ultimate Precision</h2>
+<h2>Line-level Reversing: Visual Mode Precision</h2>
 <p>
-  What if a single hunk contains both a code improvement and a debug statement? You can stage down to the individual line.
+  While staging and unstaging operates on the hunk under the cursor, neogit allows line-level precision using the <strong>Reverse</strong> key (<kbd>-</kbd>).
+</p>
+<p>
+  If you have staged a hunk but want to revert specific lines in your working tree while keeping them staged in the index, you can use Visual mode:
 </p>
 <ol>
-  <li>Move your cursor to the first line you want to stage.</li>
-  <li>Press <kbd>v</kbd> (or <kbd>V</kbd>) to enter Visual mode.</li>
-  <li>Move your cursor to highlight all the lines you want to select.</li>
-  <li>Press <kbd>s</kbd> to stage only those highlighted lines.</li>
-  <li>Press <kbd>u</kbd> if you want to unstage only the highlighted lines.</li>
+  <li>Move your cursor to the first line within the staged hunk you want to reverse.</li>
+  <li>Press <kbd>V</kbd> to enter Visual Line mode.</li>
+  <li>Highlight the specific lines you want to reverse.</li>
+  <li>Press <kbd>-</kbd> to reverse only those selected lines.</li>
 </ol>
-
 <div class="callout">
-  <strong>⚠️ Destructive discarding:</strong> You can select lines in Visual mode and press <kbd>x</kbd> to discard them. 
-  This permanently deletes them from your working tree. This maps to <code>git restore -p &lt;file&gt;</code>. Use with caution!
+  <strong>Key difference:</strong> Staging and unstaging (<kbd>s</kbd> and <kbd>u</kbd>) apply to the file or hunk under the cursor in normal mode. Visual selection with <kbd>V</kbd> is used specifically with <kbd>-</kbd> to reverse individual lines within a hunk.
 </div>
 
 <h2>Behind the Scenes: How Git CLI does it</h2>
 <p>
-  If you press <kbd>$</kbd> after staging a hunk or selected lines, you won't see a simple <code>git add</code> command. Instead, you'll see neogit doing the heavy lifting:
+  If you press <kbd>$</kbd> after staging a hunk or reversing lines, you won't see a simple <code>git add</code> command. Instead, you'll see neogit doing the heavy lifting under the hood by generating patches:
 </p>
 <ol>
   <li>neogit generates a <strong>patch file</strong> representing the exact hunk or lines.</li>
-  <li>neogit runs: <code>git apply --cached --whitespace=nowarn</code> and pipes the patch into it.</li>
+  <li>neogit runs: <code>git apply --cached --whitespace=nowarn</code> for staging hunks, or <code>git apply --reverse</code> to reverse lines.</li>
 </ol>
 <p>
   This bypasses the interactive prompt menu of the CLI's <code>git add -p</code>, giving you a faster, visual feedback loop.
@@ -104,18 +104,18 @@
 </details>
 
 <div class="quiz">
-  <p><strong>Q2:</strong> To stage specific lines within a hunk, which mode must you enter first?</p>
+  <p><strong>Q2:</strong> To reverse specific lines within a staged hunk back into the working tree, which combination is used?</p>
   <div class="options">
-    <label><input type="radio" name="q2" value="a"> a) Visual mode</label>
-    <label><input type="radio" name="q2" value="b"> b) Normal mode</label>
-    <label><input type="radio" name="q2" value="c"> c) Insert mode</label>
+    <label><input type="radio" name="q2" value="a"> a) Visual selection + -</label>
+    <label><input type="radio" name="q2" value="b"> b) Visual selection + s</label>
+    <label><input type="radio" name="q2" value="c"> c) Visual selection + u</label>
   </div>
 </div>
 
 <details class="quiz-answer">
   <summary>Reveal Answer</summary>
   <div class="callout">
-    <strong>Answer Q2:</strong> Visual mode — select lines using <kbd>v</kbd> or <kbd>V</kbd>, then stage with <kbd>s</kbd>.
+    <strong>Answer Q2:</strong> Visual selection + <kbd>-</kbd> — enters Visual mode and reverses only the selected lines within the hunk.
   </div>
 </details>
 
@@ -126,8 +126,8 @@
   <tr><td><kbd>}</kbd> / <kbd>{</kbd></td><td>Jump next / previous hunk</td><td>—</td></tr>
   <tr><td><kbd>s</kbd> on hunk</td><td>Stage hunk</td><td><code>git add -p</code></td></tr>
   <tr><td><kbd>u</kbd> on hunk</td><td>Unstage hunk</td><td><code>git restore --staged -p</code></td></tr>
-  <tr><td>Visual selection + <kbd>s</kbd></td><td>Stage selected lines</td><td><code>git apply --cached &lt;patch&gt;</code></td></tr>
-  <tr><td>Visual selection + <kbd>u</kbd></td><td>Unstage selected lines</td><td><code>git apply --cached --reverse &lt;patch&gt;</code></td></tr>
+  <tr><td><kbd>-</kbd> on hunk</td><td>Reverse hunk</td><td><code>git apply --reverse &lt;patch&gt;</code></td></tr>
+  <tr><td>Visual selection + <kbd>-</kbd></td><td>Reverse selected lines</td><td><code>git apply --reverse &lt;patch&gt;</code></td></tr>
 </table>
 
 <h2>Where to go next</h2>
@@ -153,3 +153,4 @@
 
 </body>
 </html>
+

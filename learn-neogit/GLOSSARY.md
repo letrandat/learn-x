@@ -54,6 +54,10 @@ CLI equivalent: <code>git restore --staged &lt;file&gt;</code>
 A contiguous block of changed lines. Stage/unstage individual hunks with <kbd>Tab</kbd> to expand, then <kbd>s</kbd> or <kbd>u</kbd>.
 CLI equivalent: <code>git add -p</code> (interactive patch mode)
 
+**Reversing**:
+Reverting a staged change back into the working tree while keeping it staged. In neogit: <kbd>-</kbd> (reverse change under cursor), Visual-mode <kbd>V</kbd> + <kbd>-</kbd> (reverse selected lines in hunk).
+CLI equivalent: <code>git apply --reverse</code>
+
 ## Neogit keybinding patterns
 
 **Popups** (single mnemonic keys, opened from status buffer):
