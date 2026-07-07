@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 4: Parsing and Visualizing OKF</title>
+  <link rel="stylesheet" href="../assets/lessons.css">
+</head>
+<body>
+  <header>
+    <div class="lesson-meta">Lesson 0004 • Open Knowledge Format</div>
+    <h1>Parsing and Visualizing OKF</h1>
+    <div class="subtitle">How consumer tools read frontmatter, build graphs, and render bundles.</div>
+  </header>
+
+  <main>
+    <h2>The Consumer Pattern</h2>
+    <p>
+      An OKF bundle is designed to be parsed easily by simple script engines and agent compilers without any specialized database. A typical parser traverses the directories, scans concept files, and creates an in-memory graph representation.
+    </p>
+
+    <h3>Step 1: Discovering Concepts</h3>
+    <p>
+      The parser walks the filesystem, identifying files ending in <code>.md</code>. It skips system folders (like <code>.git</code>) and reserved file names (like <code>index.md</code> and <code>log.md</code>). The relative path of each file becomes its <strong>Concept ID</strong>.
+    </p>
+
+    <h3>Step 2: Extracting Metadata</h3>
+    <p>
+      For each concept, the parser reads the top YAML frontmatter block. It maps the standard keys:
+    </p>
+    <ul>
+      <li><code>type</code>: Used to categorize node types (e.g. project, playbook).</li>
+      <li><code>title</code>: Used as the node display name.</li>
+      <li><code>description</code>: Used for previews or hover cards.</li>
+    </ul>
+
+    <h3>Step 3: Graph Linkage</h3>
+    <p>
+      The parser scans the markdown body of each file using a regular expression or a markdown AST parser to extract relative links like <code>[label](../target/concept.md)</code>. It normalizes these paths relative to the current file location to compute target Concept IDs. An edge is created between the source and target concepts.
+    </p>
+
+    <h2>Your Local Visualizer: <code>visualize.py</code></h2>
+    <p>
+      To make this process concrete, I have written a zero-dependency script at the root of your workspace named <code>visualize.py</code>. This script:
+    </p>
+    <ol>
+      <li>Finds all concepts (like <code>projects/wiki-init.md</code>).</li>
+      <li>Parses their frontmatter and markdown links.</li>
+      <li>Compiles them into a single, beautiful, interactive HTML visualizer (<code>wiki_graph.html</code>) powered by D3.js.</li>
+    </ol>
+
+    <h2>Interactive Check</h2>
+
+    <!-- Quiz 1 -->
+    <div class="quiz-container" id="quiz-1">
+      <div class="quiz-question">1. In an OKF parser, how are relationships (edges) extracted from a concept document?</div>
+      <div class="quiz-options">
+        <button class="quiz-option" onclick="checkAnswer('quiz-1', 0, false)">Extract the database schemas links.</button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-1', 1, false)">Extract the frontmatter status info.</button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-1', 2, true)">Extract the relative markdown links.</button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-1', 3, false)">Extract the repository history logs.</button>
+      </div>
+      <div class="quiz-feedback" id="feedback-1"></div>
+    </div>
+
+    <h2>Practical Exercise</h2>
+    <p>
+      Let's compile and visualize your wiki graph! 
+    </p>
+    <ol>
+      <li>Run the Python visualization script using your terminal:
+        <pre><code>python3 visualize.py</code></pre>
+      </li>
+      <li>This generates a new file in your workspace: <code>wiki_graph.html</code>.</li>
+      <li>Open <code>wiki_graph.html</code> in your browser to view your interactive force-directed graph.</li>
+    </ol>
+    <p>
+      Once you have run the script and viewed your local wiki graph, send me a message and we'll talk about how to integrate a local LLM agent to interact with this structure!
+    </p>
+  </main>
+
+  <footer class="footer-nav">
+    <a href="./0003-navigation-linking-and-logs.html">← Lesson 3: Logs</a>
+    <button class="lesson-action" onclick="location.href='./0005-agent-integration.html'">Next Lesson →</button>
+  </footer>
+
+  <script>
+    function checkAnswer(quizId, optionIndex, isCorrect) {
+      const quiz = document.getElementById(quizId);
+      const options = quiz.getElementsByClassName('quiz-option');
+      const feedback = quiz.querySelector('.quiz-feedback');
+      
+      // Reset classes
+      for (let btn of options) {
+        btn.classList.remove('correct', 'incorrect');
+      }
+      
+      if (isCorrect) {
+        options[optionIndex].classList.add('correct');
+        feedback.innerHTML = "<div class='feedback-loop-status'><span style='color: var(--success-color);'>✓ Correct!</span> Great job.</div>";
+        feedback.style.display = 'block';
+      } else {
+        options[optionIndex].classList.add('incorrect');
+        feedback.innerHTML = "<div class='feedback-loop-status'><span style='color: var(--error-color);'>✗ Incorrect.</span> Parser logic focuses on markdown bodies.</div>";
+        feedback.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

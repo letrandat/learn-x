@@ -26,7 +26,9 @@
 <p>The status buffer is an interactive <code>git status</code>. Sections, top to bottom:</p>
 <table>
   <tr><th>Section</th><th>Git CLI equivalent</th><th>What it shows</th></tr>
-  <tr><td><strong>HEAD</strong></td><td><code>git branch -vv</code></td><td>Current branch, upstream, ahead/behind counts</td></tr>
+  <tr><td><strong>HEAD (Lines)</strong></td><td></td><td></td></tr>
+  <tr><td>↳ <em>Head:</em></td><td><code>git log -1 --oneline</code></td><td>Your current local branch, commit hash, and message</td></tr>
+  <tr><td>↳ <em>Merge:</em></td><td><code>git log -1 --oneline @{u}</code></td><td>Your upstream remote tracking branch and its latest commit</td></tr>
   <tr><td>Untracked</td><td><code>git status --porcelain</code> (<code>??</code>)</td><td>Files git doesn't know about</td></tr>
   <tr><td>Unstaged</td><td><code>git diff</code></td><td>Modified files not yet staged</td></tr>
   <tr><td>Staged</td><td><code>git diff --cached</code></td><td>Files added to the index, ready to commit</td></tr>
@@ -35,6 +37,11 @@
   <tr><td>Unpulled</td><td><code>git log HEAD..@{upstream}</code></td><td>Commits the remote has that you don't</td></tr>
   <tr><td>Recent</td><td><code>git log --oneline -10</code></td><td>Last 10 commits on this branch</td></tr>
 </table>
+
+<blockquote>
+  💡 <strong>Pro-Tip:</strong> While Neogit runs <code>git branch -vv</code> behind the scenes to gather your branch state, it elegantly splits your local status (<strong>Head</strong>) and your remote status (<strong>Merge</strong>) into two lines. You can see this exact split on your CLI by running:<br>
+  <code>git log -1 --oneline &amp;&amp; git log -1 --oneline @{u}</code>
+</blockquote>
 
 <div class="callout">
   <strong>Core insight:</strong> Every section of the status buffer <em>is</em> output from a git CLI command.
@@ -83,6 +90,23 @@ Each depth level corresponds to the detail you'd get from different <code>git di
   <tr><td><kbd>q</kbd></td><td>Close neogit</td><td>—</td></tr>
 </table>
 
+<h2>Quick quiz</h2>
+<div class="quiz">
+  <p><strong>Q:</strong> Which key opens the git command history in neogit's status buffer?</p>
+  <div class="options">
+    <label><input type="radio" name="q1" value="a"> a) $</label>
+    <label><input type="radio" name="q1" value="b"> b) #</label>
+    <label><input type="radio" name="q1" value="c"> c) !</label>
+  </div>
+</div>
+
+<details class="quiz-answer">
+  <summary>Reveal Answer</summary>
+  <div class="callout">
+    <strong>Answer:</strong> <kbd>$</kbd> — opens the command history showing all CLI commands run.
+  </div>
+</details>
+
 <h2>Where to go next</h2>
 <ul>
   <li>Browse the <a href="../GLOSSARY.md">Glossary</a> for any unfamiliar terms</li>
@@ -95,6 +119,10 @@ Each depth level corresponds to the detail you'd get from different <code>git di
   <a href="https://github.com/NeogitOrg/neogit/blob/master/doc/neogit.txt">neogit.txt (official docs)</a>
   — the status buffer mappings and popup reference.
 </p>
+
+<div class="lesson-navigation">
+  <a href="0002-staging-the-index.html" class="btn btn-next">Next Lesson: 002: Staging — The Index Demystified &rarr;</a>
+</div>
 
 <div class="followup">
   <strong>Questions?</strong> Ask me anything — I'm your teacher.<br>

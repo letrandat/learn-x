@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>002: Staging — The Index Demystified</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<meta name="color-scheme" content="light dark">
+</head>
+<body>
+
+<h1>002: Staging — The Index Demystified</h1>
+<p class="lesson-meta">Goal: Master staging/unstaging in neogit while understanding <code>git add</code> and <code>git restore --staged</code>.</p>
+
+<h2>The Three Areas of Git</h2>
+<p>Git has three areas you must understand:</p>
+<ol>
+  <li><strong>Working tree</strong> — your edited files on disk</li>
+  <li><strong>Index (staging area)</strong> — changes queued for the next commit</li>
+  <li><strong>Repository</strong> — committed snapshots</li>
+</ol>
+
+<div class="callout">
+  <strong>Key insight:</strong> Only changes in the <em>index</em> get committed.
+  Changes in the working tree alone are not saved until you stage and commit.
+</div>
+
+<h2>neogit staging workflow</h2>
+<p>The status buffer shows two critical sections:</p>
+<ul>
+  <li><strong>Unstaged</strong> — changes in working tree, not yet in index</li>
+  <li><strong>Staged</strong> — changes ready to be committed</li>
+</ul>
+
+<h3>Stage a single file</h3>
+<p>Move cursor to an unstaged file, press <kbd>s</kbd>:</p>
+<pre><code>:Neogit → cursor on file → s</code></pre>
+<p class="cli-equivalent">CLI equivalent: <code>git add &lt;file&gt;</code></p>
+
+<h3>Unstage a single file</h3>
+<p>Move cursor to a staged file, press <kbd>u</kbd>:</p>
+<pre><code>:Neogit → cursor on file → u</code></pre>
+<p class="cli-equivalent">CLI equivalent: <code>git restore --staged &lt;file&gt;</code></p>
+
+<h3>Stage all unstaged</h3>
+<p>Press <kbd>S</kbd> (capital S) from status buffer:</p>
+<pre><code>:Neogit → press S</code></pre>
+<p class="cli-equivalent">CLI equivalent: <code>git add .</code></p>
+
+<h3>Stage all (including new files)</h3>
+<p>Press <kbd>C-s</kbd> (Ctrl+s) from status buffer:</p>
+<pre><code>:Neogit → press C-s</code></pre>
+<p class="cli-equivalent">CLI equivalent: <code>git add -A</code></p>
+
+<h2>Exercise: Stage, modify, unstage</h2>
+<ol>
+  <li>Open neogit: <code>:Neogit</code></li>
+  <li>Stage a file with <kbd>s</kbd> — press <kbd>$</kbd> to see <code>git add</code></li>
+  <li>Modify the same file in another buffer</li>
+  <li>Back in neogit, you'll see it in "Unstaged" — press <kbd>s</kbd> again to re-stage</li>
+  <li>Try <kbd>u</kbd> to unstage — see <code>git restore --staged</code> in history</li>
+  <li>Compare: <code>git diff</code> vs <code>git diff --cached</code></li>
+</ol>
+
+<h2>Quick quiz</h2>
+<div class="quiz">
+  <p><strong>Q:</strong> You staged <code>app.js</code> but want to unstage it. Which key?</p>
+  <div class="options">
+    <label><input type="radio" name="q1" value="a"> a) s</label>
+    <label><input type="radio" name="q1" value="b"> b) u</label>
+    <label><input type="radio" name="q1" value="c"> c) U</label>
+  </div>
+</div>
+
+<details class="quiz-answer">
+  <summary>Reveal Answer</summary>
+  <div class="callout">
+    <strong>Answer:</strong> <kbd>u</kbd> — the counterpart to <kbd>s</kbd> that unstages the item under the cursor.
+  </div>
+</details>
+
+<h2>CLI comparison table</h2>
+<table>
+  <tr><th>neogit key</th><th>Action</th><th>git CLI</th></tr>
+  <tr><td><kbd>s</kbd></td><td>Stage item</td><td><code>git add &lt;path&gt;</code></td></tr>
+  <tr><td><kbd>u</kbd></td><td>Unstage item</td><td><code>git restore --staged &lt;path&gt;</code></td></tr>
+  <tr><td><kbd>S</kbd></td><td>Stage all unstaged</td><td><code>git add .</code></td></tr>
+  <tr><td><kbd>U</kbd></td><td>Unstage all</td><td><code>git restore --staged .</code></td></tr>
+  <tr><td><kbd>C-s</kbd></td><td>Stage all (incl. new)</td><td><code>git add -A</code></td></tr>
+</table>
+
+<h2>Where to go next</h2>
+<ul>
+  <li>See <a href="../reference/status-buffer-keys.html">Status Buffer Keys Reference</a></li>
+  <li>Practice staging individual hunks: <kbd>Tab</kbd> to expand, then <kbd>s</kbd> on a hunk</li>
+  <li><a href="0001-status-buffer-and-git-cli.html">Lesson 1</a> covered the status buffer anatomy</li>
+</ul>
+
+<h2>Primary source</h2>
+<p>
+  <a href="https://git-scm.com/docs/git-add">git-add(1) — Git documentation</a>
+  — authoritative reference for staging behavior.
+</p>
+
+<div class="lesson-navigation">
+  <a href="0001-status-buffer-and-git-cli.html" class="btn btn-prev">&larr; Previous Lesson: 001: The Status Buffer</a>
+  <a href="0003-hunk-and-line-staging.html" class="btn btn-next">Next Lesson: 003: Hunk and Line Staging &rarr;</a>
+</div>
+
+<div class="followup">
+  <strong>Questions?</strong> Ask me anything — I'm your teacher.<br>
+  What happens with <code>git add -N</code> for new files? Why does <kbd>x</kbd> discard changes?
+</div>
+
+</body>
+</html>

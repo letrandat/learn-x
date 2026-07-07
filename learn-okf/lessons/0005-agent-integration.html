@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 5: Local Agent Integration</title>
+  <link rel="stylesheet" href="../assets/lessons.css">
+</head>
+<body>
+  <header>
+    <div class="lesson-meta">Lesson 0005 • Open Knowledge Format</div>
+    <h1>Local Agent Integration</h1>
+    <div class="subtitle">How to configure and empower AI agents to read, write, and maintain your OKF Wiki.</div>
+  </header>
+
+  <main>
+    <h2>Enrichment vs. Consumption Agents</h2>
+    <p>
+      An OKF bundle is designed to be highly interoperable, acting as a shared memory layer between human owners and AI agents. In practice, agents interacting with an OKF bundle fall into two categories:
+    </p>
+    <ul>
+      <li><strong>Consumption Agents:</strong> Read existing concepts to retrieve domain-specific context (e.g. querying a playbook before executing a task).</li>
+      <li><strong>Enrichment/Maintenance Agents:</strong> Programmatically create, edit, and keep metadata up to date, maintaining chronological changelogs in <code>log.md</code>.</li>
+    </ul>
+
+    <h2>The Read-Write Agent Loop</h2>
+    <p>
+      To build a reliable agent integration, the agent needs clear rules on how to browse and update the wiki without corrupting its structure.
+    </p>
+
+    <h3>1. Navigating via Progressive Disclosure</h3>
+    <p>
+      Instead of dumping the entire repository into the context window, consumption agents should read <code>index.md</code> first. This acts as a table of contents. If they need details on a specific project or domain, they follow the link to that file (or sub-directory index) dynamically. This minimizes token consumption and scales to thousands of documents.
+    </p>
+
+    <h3>2. Writing Concepts with Structural Integrity</h3>
+    <p>
+      When an enrichment agent creates or edits a concept document, it must follow these constraints:
+    </p>
+    <ul>
+      <li><strong>Always include YAML frontmatter:</strong> It must start and end with <code>---</code> on its own line and include a valid <code>type</code> value.</li>
+      <li><strong>Compute Concept IDs:</strong> The agent should match relative links correctly (e.g. <code>[label](../subdir/target.md)</code>) when linking concepts.</li>
+      <li><strong>Use ISO-8601 timestamps:</strong> Record the modification time in the frontmatter <code>timestamp</code> field.</li>
+    </ul>
+
+    <h3>3. Maintaining the Changelog</h3>
+    <p>
+      Every time an agent modifies or adds a file, it must append a record to <code>log.md</code> at the root. The update entry must:
+    </p>
+    <ol>
+      <li>Be grouped under a date heading formatted as <code>## YYYY-MM-DD</code>. If the heading for today doesn't exist, create it at the top (right below the main title).</li>
+      <li>Begin each change bullet point with a bold action verb (e.g., <code>* **Creation** of `projects/new-concept.md` ...</code>).</li>
+    </ol>
+
+    <div class="callout tip">
+      <div class="callout-title">Model Context Protocol (MCP) Integration</div>
+      <p>
+        In professional setups, agents are given access to the filesystem via the Model Context Protocol (MCP) filesystem server. This allows them to read, search, and edit local files directly via structured tools rather than relying on raw terminal commands.
+      </p>
+    </div>
+
+    <h2>Interactive Check</h2>
+
+    <!-- Quiz 1 -->
+    <div class="quiz-container" id="quiz-1">
+      <div class="quiz-question">1. When an agent updates a concept file in the OKF bundle, what change is also required in the bundle's `log.md`?</div>
+      <div class="quiz-options">
+        <button class="quiz-option" onclick="checkAnswer('quiz-1', 0, false)">Create a new git tag with the change log description.</button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-1', 1, true)">Append a change description under a date heading formatted as ## YYYY-MM-DD, ordered newest first.</button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-1', 2, false)">Insert a YAML block containing the change details at the top of the file.</button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-1', 3, false)">Nothing, log.md is only for human authors to modify.</button>
+      </div>
+      <div class="quiz-feedback" id="feedback-1"></div>
+    </div>
+
+    <h2>Practical Exercise</h2>
+    <p>
+      Let's write a simple Python automation script to simulate an <strong>Enrichment Agent</strong>! This script will automatically create a new concept document, update the root index, and write to the changelog.
+    </p>
+    <p>
+      Create a script named <code>agent_simulate.py</code> at the root of your workspace directory with the following contents:
+    </p>
+    <pre><code>import os
+from datetime import datetime, timezone
+
+# Define paths
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+CONCEPT_PATH = os.path.join(ROOT_DIR, "projects", "agent-collab.md")
+INDEX_PATH = os.path.join(ROOT_DIR, "index.md")
+LOG_PATH = os.path.join(ROOT_DIR, "log.md")
+
+# 1. Create the new concept file
+concept_content = f"""---
+type: project
+title: Agent Collaboration Wiki
+description: Integrating automated agents to collaborate on the OKF knowledge base.
+tags: [agent, automation]
+timestamp: {datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")}
+---
+
+# Agent Collaboration Wiki
+
+This concept was created automatically by our local simulation agent.
+It links back to our [Initial Wiki Project](wiki-init.md).
+"""
+
+os.makedirs(os.path.dirname(CONCEPT_PATH), exist_ok=True)
+with open(CONCEPT_PATH, "w", encoding="utf-8") as f:
+    f.write(concept_content)
+print(f"Created: projects/agent-collab.md")
+
+# 2. Update root index.md
+with open(INDEX_PATH, "r", encoding="utf-8") as f:
+    index_lines = f.readlines()
+
+new_index_entry = "* [Agent Collaboration Project](projects/agent-collab.md) - Integrating automated agents to collaborate on the OKF wiki.\n"
+if not any("agent-collab.md" in line for line in index_lines):
+    # Find list section and append
+    index_lines.append(new_index_entry)
+    with open(INDEX_PATH, "w", encoding="utf-8") as f:
+        f.writelines(index_lines)
+    print("Updated: index.md")
+
+# 3. Update log.md
+today = datetime.now().strftime("%Y-%m-%d")
+with open(LOG_PATH, "r", encoding="utf-8") as f:
+    log_content = f.read()
+
+log_lines = log_content.splitlines()
+entry_heading = f"## {today}"
+log_entry = f"\n{entry_heading}\n\n* **Creation** of `projects/agent-collab.md` via agent simulation.\n* **Update** of `index.md` listing the new Agent Collaboration concept."
+
+# Check if today's header is already there
+if entry_heading in log_content:
+    # Append bullet points below the header
+    for idx, line in enumerate(log_lines):
+        if line.strip() == entry_heading:
+            log_lines.insert(idx + 2, "* **Creation** of `projects/agent-collab.md` via agent simulation.")
+            log_lines.insert(idx + 3, "* **Update** of `index.md` listing the new Agent Collaboration concept.")
+            break
+    with open(LOG_PATH, "w", encoding="utf-8") as f:
+        f.write("\n".join(log_lines) + "\n")
+else:
+    # Insert new section below title (first line)
+    title_line = log_lines[0]
+    remaining = "\n".join(log_lines[1:])
+    new_log = f"{title_line}\n{log_entry}\n{remaining}"
+    with open(LOG_PATH, "w", encoding="utf-8") as f:
+        f.write(new_log)
+print("Updated: log.md")
+</code></pre>
+
+    <p>
+      Now, perform the following steps:
+    </p>
+    <ol>
+      <li>Run the simulation script in your terminal:
+        <pre><code>python3 agent_simulate.py</code></pre>
+      </li>
+      <li>Re-run the visualization script to compile the new relationship:
+        <pre><code>python3 visualize.py</code></pre>
+      </li>
+      <li>Open <code>wiki_graph.html</code> in your browser to verify that the new <strong>Agent Collaboration Wiki</strong> node is visible and linked!</li>
+    </ol>
+  </main>
+
+  <footer class="footer-nav">
+    <a href="./0004-parsing-and-visualizing-okf.html">← Lesson 4: Visualization</a>
+    <button class="lesson-action" onclick="alert('Run agent_simulate.py and visualize.py to complete the course!')">Finish Course →</button>
+  </footer>
+
+  <script>
+    function checkAnswer(quizId, optionIndex, isCorrect) {
+      const quiz = document.getElementById(quizId);
+      const options = quiz.getElementsByClassName('quiz-option');
+      const feedback = quiz.querySelector('.quiz-feedback');
+      
+      // Reset classes
+      for (let btn of options) {
+        btn.classList.remove('correct', 'incorrect');
+      }
+      
+      if (isCorrect) {
+        options[optionIndex].classList.add('correct');
+        feedback.innerHTML = "<div class='feedback-loop-status'><span style='color: var(--success-color);'>✓ Correct!</span> Fantastic work. You understand the agent lifecycle.</div>";
+        feedback.style.display = 'block';
+      } else {
+        options[optionIndex].classList.add('incorrect');
+        feedback.innerHTML = "<div class='feedback-loop-status'><span style='color: var(--error-color);'>✗ Incorrect.</span> Recall the structure of log.md defined in Lesson 3.</div>";
+        feedback.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

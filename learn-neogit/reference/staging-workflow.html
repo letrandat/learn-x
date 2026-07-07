@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Staging Workflow — Quick Reference</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<style>
+  body { max-width: 960px; }
+  .cli { font-family: var(--mono); color: var(--muted); font-size: 0.9rem; }
+  h2 { margin-top: 1.5rem; }
+</style>
+</head>
+<body>
+
+<h1>Staging Workflow — Quick Reference</h1>
+<p class="lesson-meta">Print-friendly. Stage/unstage operations mapped to CLI.</p>
+
+<h2>Git's Three Areas</h2>
+<table>
+  <tr><th>Area</th><th>Description</th></tr>
+  <tr><td>Working tree</td><td>Your edited files on disk</td></tr>
+  <tr><td>Index (staging area)</td><td>Changes queued for next commit</td></tr>
+  <tr><td>Repository</td><td>Committed snapshots</td></tr>
+</table>
+
+<h2>neogit → CLI Mapping</h2>
+<table>
+  <tr><th>neogit key</th><th>Action</th><th class="cli">Git CLI</th></tr>
+  <tr><td><kbd>s</kbd></td><td>Stage item under cursor</td><td class="cli">git add <file></td></tr>
+  <tr><td><kbd>u</kbd></td><td>Unstage item under cursor</td><td class="cli">git restore --staged <file></td></tr>
+  <tr><td><kbd>S</kbd></td><td>Stage all unstaged</td><td class="cli">git add .</td></tr>
+  <tr><td><kbd>U</kbd></td><td>Unstage all staged</td><td class="cli">git restore --staged .</td></tr>
+  <tr><td><kbd>C-s</kbd></td><td>Stage all (incl. untracked)</td><td class="cli">git add -A</td></tr>
+  <tr><td><kbd>Tab</kbd></td><td>Expand hunk → stage hunk</td><td class="cli">git add -p</td></tr>
+</table>
+
+<h2>Diff commands to inspect state</h2>
+<table>
+  <tr><th>Command</th><th>Shows</th></tr>
+  <tr><td><code>git diff</code></td><td>Working tree vs index (unstaged changes)</td></tr>
+  <tr><td><code>git diff --cached</code></td><td>Index vs HEAD (staged changes)</td></tr>
+  <tr><td><code>git diff HEAD</code></td><td>Working tree vs HEAD (all changes)</td></tr>
+</table>
+
+<h2>Hunk-level staging</h2>
+<ol>
+  <li>In status buffer, press <kbd>Tab</kbd> on a file to expand</li>
+  <li>Navigate to a hunk, press <kbd>s</kbd> to stage just that hunk</li>
+  <li>CLI equivalent: <code>git add -p <file></code> (interactive patch mode)</li>
+</ol>
+
+<h2>Common patterns</h2>
+<h3>Stage everything and commit</h3>
+<pre><code>S          # stage all
+c c        # commit</code></pre>
+<p class="cli">CLI: <code>git add . && git commit</code></p>
+
+<h3>Stage only specific files</h3>
+<pre><code>s          # stage file (repeat)
+c c        # commit</code></pre>
+<p class="cli">CLI: <code>git add file1 file2 && git commit</code></p>
+
+<h3>Unstage, fix, re-stage</h3>
+<pre><code>u          # unstage
+# edit file
+s          # re-stage
+c c        # commit</code></pre>
+<p class="cli">CLI: <code>git restore --staged file && git add file && git commit</code></p>
+
+</body>
+</html>

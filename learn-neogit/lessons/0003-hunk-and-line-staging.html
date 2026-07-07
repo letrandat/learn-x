@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>003: Hunk Staging and Reversing Selected Lines</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<meta name="color-scheme" content="light dark">
+</head>
+<body>
+
+<h1>003: Hunk Staging and Reversing Selected Lines</h1>
+<p class="lesson-meta">Goal: Master staging and unstaging individual hunks in neogit, and see how to reverse specific lines using visual selection.</p>
+
+<h2>The Power of Partial Staging</h2>
+<p>
+  Imagine you have been working on a file for an hour. You have added a feature, updated the documentation, and inserted several <code>console.log()</code> statements for debugging.
+</p>
+<p>
+  If you stage the entire file, you commit your debug noise alongside the clean code. If you don't stage it, you can't commit the new feature.
+  This is where <strong>partial staging</strong> shines: you can stage only the hunks representing the feature, leaving the debug logs unstaged in your working tree.
+</p>
+
+<div class="callout">
+  <strong>Key concept:</strong> A <strong>hunk</strong> is a contiguous block of changed lines.
+  By staging at the hunk level, you curate precise, readable commits.
+</div>
+
+<h2>Hunk Staging in neogit</h2>
+<p>
+  In the status buffer, you can inspect and stage changes hunk-by-hunk.
+</p>
+
+<h3>1. Expanding file diffs</h3>
+<p>
+  Move your cursor to an unstaged file in the status buffer and press <kbd>Tab</kbd> to expand it.
+  You can also press <kbd>4</kbd> to expand all file diffs in the buffer at once.
+</p>
+
+<h3>2. Navigating between hunks</h3>
+<p>
+  While you can navigate line-by-line using <kbd>j</kbd> and <kbd>k</kbd>, neogit provides quick jumps:
+</p>
+<ul>
+  <li>Press <kbd>}</kbd> to jump to the next hunk header.</li>
+  <li>Press <kbd>{</kbd> to jump to the previous hunk header.</li>
+</ul>
+
+<h3>3. Staging and unstaging a hunk</h3>
+<p>
+  Position your cursor anywhere within a hunk (or on its header) in normal mode and press:
+</p>
+<ul>
+  <li><kbd>s</kbd> to stage the hunk under the cursor.</li>
+  <li><kbd>u</kbd> to unstage the hunk under the cursor.</li>
+</ul>
+<p class="cli-equivalent">CLI equivalents: <code>git add -p &lt;file&gt;</code> (interactive staging) and <code>git restore --staged -p &lt;file&gt;</code> (interactive unstaging)</p>
+
+<h2>Line-level Reversing: Visual Mode Precision</h2>
+<p>
+  While staging and unstaging operates on the hunk under the cursor, neogit allows line-level precision using the <strong>Reverse</strong> key (<kbd>-</kbd>).
+</p>
+<p>
+  If you have staged a hunk but want to revert specific lines in your working tree while keeping them staged in the index, you can use Visual mode:
+</p>
+<ol>
+  <li>Move your cursor to the first line within the staged hunk you want to reverse.</li>
+  <li>Press <kbd>V</kbd> to enter Visual Line mode.</li>
+  <li>Highlight the specific lines you want to reverse.</li>
+  <li>Press <kbd>-</kbd> to reverse only those selected lines.</li>
+</ol>
+<div class="callout">
+  <strong>Key difference:</strong> Staging and unstaging (<kbd>s</kbd> and <kbd>u</kbd>) apply to the file or hunk under the cursor in normal mode. Visual selection with <kbd>V</kbd> is used specifically with <kbd>-</kbd> to reverse individual lines within a hunk.
+</div>
+
+<h2>Behind the Scenes: How Git CLI does it</h2>
+<p>
+  If you press <kbd>$</kbd> after staging a hunk or reversing lines, you won't see a simple <code>git add</code> command. Instead, you'll see neogit doing the heavy lifting under the hood by generating patches:
+</p>
+<ol>
+  <li>neogit generates a <strong>patch file</strong> representing the exact hunk or lines.</li>
+  <li>neogit runs: <code>git apply --cached --whitespace=nowarn</code> for staging hunks, or <code>git apply --reverse</code> to reverse lines.</li>
+</ol>
+<p>
+  This bypasses the interactive prompt menu of the CLI's <code>git add -p</code>, giving you a faster, visual feedback loop.
+</p>
+
+<h2>Quick Quiz</h2>
+
+<div class="quiz">
+  <p><strong>Q1:</strong> Which keys jump between hunk headers in neogit status buffer?</p>
+  <div class="options">
+    <label><input type="radio" name="q1" value="a"> a) { / }</label>
+    <label><input type="radio" name="q1" value="b"> b) [ / ]</label>
+    <label><input type="radio" name="q1" value="c"> c) &lt; / &gt;</label>
+  </div>
+</div>
+
+<details class="quiz-answer">
+  <summary>Reveal Answer</summary>
+  <div class="callout">
+    <strong>Answer Q1:</strong> <kbd>{</kbd> and <kbd>}</kbd> — jumps to previous/next hunk headers.
+  </div>
+</details>
+
+<div class="quiz">
+  <p><strong>Q2:</strong> To reverse specific lines within a staged hunk back into the working tree, which combination is used?</p>
+  <div class="options">
+    <label><input type="radio" name="q2" value="a"> a) Visual selection + -</label>
+    <label><input type="radio" name="q2" value="b"> b) Visual selection + s</label>
+    <label><input type="radio" name="q2" value="c"> c) Visual selection + u</label>
+  </div>
+</div>
+
+<details class="quiz-answer">
+  <summary>Reveal Answer</summary>
+  <div class="callout">
+    <strong>Answer Q2:</strong> Visual selection + <kbd>-</kbd> — enters Visual mode and reverses only the selected lines within the hunk.
+  </div>
+</details>
+
+<h2>CLI comparison table</h2>
+<table>
+  <tr><th>neogit key</th><th>Action</th><th>git CLI</th></tr>
+  <tr><td><kbd>Tab</kbd> on file</td><td>Toggle hunk visibility</td><td><code>git diff</code></td></tr>
+  <tr><td><kbd>}</kbd> / <kbd>{</kbd></td><td>Jump next / previous hunk</td><td>—</td></tr>
+  <tr><td><kbd>s</kbd> on hunk</td><td>Stage hunk</td><td><code>git add -p</code></td></tr>
+  <tr><td><kbd>u</kbd> on hunk</td><td>Unstage hunk</td><td><code>git restore --staged -p</code></td></tr>
+  <tr><td><kbd>-</kbd> on hunk</td><td>Reverse hunk</td><td><code>git apply --reverse &lt;patch&gt;</code></td></tr>
+  <tr><td>Visual selection + <kbd>-</kbd></td><td>Reverse selected lines</td><td><code>git apply --reverse &lt;patch&gt;</code></td></tr>
+</table>
+
+<h2>Where to go next</h2>
+<ul>
+  <li>See <a href="../reference/staging-workflow.html">Staging Workflow Reference</a></li>
+  <li>Read about the staging area in <a href="0002-staging-the-index.html">Lesson 2</a></li>
+</ul>
+
+<h2>Primary source</h2>
+<p>
+  <a href="https://git-scm.com/docs/git-add#_interactive_mode">git-add(1) Interactive Mode</a>
+  — Git documentation covering patch and interactive options.
+</p>
+
+<div class="lesson-navigation">
+  <a href="0002-staging-the-index.html" class="btn btn-prev">&larr; Previous Lesson: 002: Staging</a>
+</div>
+
+<div class="followup">
+  <strong>Questions?</strong> Ask me anything — I'm your teacher.<br>
+  Confused by git diff headers? Want to see how a patch file looks? Just ask.
+</div>
+
+</body>
+</html>
+

@@ -130,4 +130,93 @@ th { font-weight: 600; }
 @media print {
   body { font-size: 11pt; line-height: 1.4; }
   .followup { display: none; }
+  .lesson-navigation { display: none; }
 }
+
+/* Lesson navigation buttons */
+.lesson-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 2.5rem 0 1.5rem 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.btn-next {
+  margin-left: auto;
+}
+
+/* Quiz Answer Collapsible */
+details.quiz-answer {
+  margin: 1rem 0;
+}
+details.quiz-answer summary {
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 500;
+  width: fit-content;
+  user-select: none;
+  transition: all 0.2s ease-in-out;
+}
+details.quiz-answer summary:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+details.quiz-answer[open] summary {
+  margin-bottom: 0.75rem;
+}
+
+/* Quiz styling */
+.quiz {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1.5rem 0;
+}
+.quiz p {
+  margin-bottom: 0.75rem;
+}
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.options label {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+
