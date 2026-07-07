@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 1: The Context Assembly Problem and OKF</title>
+  <link rel="stylesheet" href="../assets/lessons.css">
+</head>
+<body>
+  <header>
+    <div class="lesson-meta">Lesson 0001 • Open Knowledge Format</div>
+    <h1>The Context Assembly Problem and OKF</h1>
+    <div class="subtitle">Why AI agents need a shared language for metadata, and how OKF builds it.</div>
+  </header>
+
+  <main>
+    <h2>Introduction</h2>
+    <p>
+      Modern large language models (LLMs) are incredibly capable. They can write code, build plans, and analyze datasets. However, they are fundamentally limited by <strong>context</strong>. Without access to the correct, up-to-date internal details of an organization, foundation models cannot produce accurate and actionable results.
+    </p>
+
+    <div class="callout important">
+      <div class="callout-title">The Context Assembly Problem</div>
+      <p>
+        In most companies, metadata is fragmented. It lives across database schemas, wiki pages, docstrings, and slack channels. Every catalog vendor has its own SDK or API. This means every agent developer must solve the same "context assembly" problem from scratch, and knowledge remains siloed.
+      </p>
+    </div>
+
+    <h2>What is the Open Knowledge Format?</h2>
+    <p>
+      The <strong>Open Knowledge Format (OKF)</strong> is an open-source, vendor-neutral specification (currently v0.1) that formalizes the "LLM-Wiki" pattern into a portable and interoperable structure. 
+    </p>
+    <p>
+      OKF relies on three core simplicity principles:
+    </p>
+    <ul>
+      <li><strong>Just Markdown:</strong> Concepts are represented as human-readable markdown files, editables in any tool.</li>
+      <li><strong>Just Files:</strong> Shipped as standard directories, git repositories, or tarballs.</li>
+      <li><strong>Just YAML Frontmatter:</strong> Minimal metadata fields used to describe the concepts.</li>
+    </ul>
+
+    <h2>Concept Documents and Graph Relations</h2>
+    <p>
+      An OKF <strong>Bundle</strong> is a folder containing <em>concept documents</em>. Each file represents a concept (e.g. a table, a metric, a runbook, or an API). 
+    </p>
+    <p>
+      A concept document is a markdown file with YAML frontmatter at the top:
+    </p>
+
+    <pre><code>---
+type: table
+title: core.users
+description: Authoritative register of all user accounts.
+resource: bigquery://my-project.core.users
+tags: [pii, core]
+timestamp: 2026-07-06T21:45:00Z
+---
+# core.users
+This table lists all registered accounts...
+</code></pre>
+
+    <p>
+      Concepts link to each other using standard markdown links (e.g., <code>[users](table/users.md)</code>), turning the directory structure into a <strong>relational graph</strong>.
+    </p>
+
+    <div class="callout tip">
+      <div class="callout-title">Key Principle: Minimally Opinionated</div>
+      <p>
+        The spec requires exactly <strong>one</strong> field in the YAML frontmatter: <code>type</code>. This ensures the standard governs interoperability, not the exact schemas you choose to model.
+      </p>
+    </div>
+
+    <h2>Interactive Check</h2>
+    <p>Test your retention of these core principles before we move forward.</p>
+
+    <!-- Quiz 1 -->
+    <div class="quiz-container" id="quiz-1">
+      <div class="quiz-question">1. According to the OKF v0.1 spec, which metadata field is strictly required in the YAML frontmatter of every concept document?</div>
+      <div class="quiz-options">
+        <button class="quiz-option" onclick="checkAnswer('quiz-1', 0, false)">The `tags` key is the only one.</button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-1', 1, false)">The `name` key is the only one.</button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-1', 2, true)">The `type` key is the only one.</button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-1', 3, false)">The `path` key is the only one.</button>
+      </div>
+      <div class="quiz-feedback" id="feedback-1"></div>
+    </div>
+
+    <!-- Quiz 2 -->
+    <div class="quiz-container" id="quiz-2">
+      <div class="quiz-question">2. What primary file format does OKF v0.1 use to document a dataset or API concept?</div>
+      <div class="quiz-options">
+        <button class="quiz-option" onclick="checkAnswer('quiz-2', 0, false)">Document JSON format files.</button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-2', 1, true)">Markdown text format files.</button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-2', 2, false)">Database YAML format files.</button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-2', 3, false)">Standard HTML format files.</button>
+      </div>
+      <div class="quiz-feedback" id="feedback-2"></div>
+    </div>
+
+    <h2>Next Steps</h2>
+    <p>
+      Read the primary source: <a href="https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing" target="_blank">Google Cloud Blog - How OKF Can Improve Data Sharing</a>.
+    </p>
+    <p>
+      In the next lesson, we will explore the <strong>specifications</strong> in detail, including standard folders, graph linkages, and the reference implementations GCP has shipped.
+    </p>
+
+    <div class="callout">
+      <p>💡 <em>Tip: You can ask your AI instructor any clarifying questions about this lesson in the chat window.</em></p>
+    </div>
+  </main>
+
+  <footer class="footer-nav">
+    <span>← Start of Course</span>
+    <button class="lesson-action" onclick="alert('Proceeding to next step...')">Next Lesson →</button>
+  </footer>
+
+  <script>
+    function checkAnswer(quizId, optionIndex, isCorrect) {
+      const quiz = document.getElementById(quizId);
+      const options = quiz.getElementsByClassName('quiz-option');
+      const feedback = quiz.querySelector('.quiz-feedback');
+      
+      // Reset classes
+      for (let btn of options) {
+        btn.classList.remove('correct', 'incorrect');
+      }
+      
+      if (isCorrect) {
+        options[optionIndex].classList.add('correct');
+        feedback.innerHTML = "<div class='feedback-loop-status'><span style='color: var(--success-color);'>✓ Correct!</span> Great job.</div>";
+        feedback.style.display = 'block';
+      } else {
+        options[optionIndex].classList.add('incorrect');
+        feedback.innerHTML = "<div class='feedback-loop-status'><span style='color: var(--error-color);'>✗ Incorrect.</span> Try reviewing the material above!</div>";
+        feedback.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

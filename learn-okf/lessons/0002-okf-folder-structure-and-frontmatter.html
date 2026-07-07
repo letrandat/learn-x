@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 2: OKF Folder Structure and Frontmatter</title>
+  <link rel="stylesheet" href="../assets/lessons.css">
+</head>
+<body>
+  <header>
+    <div class="lesson-meta">Lesson 0002 • Open Knowledge Format</div>
+    <h1>OKF Folder Structure and Frontmatter</h1>
+    <div class="subtitle">Understanding reserved files, Concept IDs, and metadata keys.</div>
+  </header>
+
+  <main>
+    <h2>Bundle Structure</h2>
+    <p>
+      An OKF <strong>Bundle</strong> is simply a directory tree of UTF-8 markdown files. The folder structure itself is independent of the domain—you can organize concepts in whatever subdirectory hierarchy makes sense for your personal or professional wiki.
+    </p>
+
+    <h3>Reserved Filenames</h3>
+    <p>
+      The OKF specification reserves two filenames at any level of your wiki hierarchy. These files serve specific structural roles and <strong>must not</strong> be used to represent regular concept documents:
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Filename</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>index.md</code></td>
+          <td>Used to list directory contents to enable <em>progressive disclosure</em> as an agent navigates the hierarchy.</td>
+        </tr>
+        <tr>
+          <td><code>log.md</code></td>
+          <td>Used to maintain a chronological log/history of changes and updates to the concepts in that folder.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout important">
+      <div class="callout-title">Concept IDs</div>
+      <p>
+        Every regular markdown file in the bundle represents a single <strong>Concept</strong>. A concept's identity is defined by its <strong>Concept ID</strong>, which is its file path relative to the bundle root, with the <code>.md</code> extension removed.
+      </p>
+      <p>
+        For example: A document stored at <code>projects/my-website.md</code> has the Concept ID <code>projects/my-website</code>.
+      </p>
+    </div>
+
+    <h2>Concept Documents: Frontmatter Specification</h2>
+    <p>
+      Each concept document consists of a YAML frontmatter block at the top and a markdown body.
+    </p>
+    <p>
+      Here is the standard schema for the frontmatter block:
+    </p>
+    <pre><code>---
+type: &lt;Type name&gt;                  # REQUIRED (e.g. project, playbook, runbook, metric)
+title: &lt;Optional display name&gt;      # Recommended display title
+description: &lt;Optional summary&gt;     # Recommended one-sentence summary
+resource: &lt;Optional canonical URI&gt;  # URI for physical assets (e.g., code repos, databases)
+tags: [&lt;tag&gt;, &lt;tag&gt;, ...]           # Optional array of classification tags
+timestamp: &lt;ISO 8601 datetime&gt;     # Optional last-modified time
+---
+# Body goes here...</code></pre>
+
+    <div class="callout tip">
+      <div class="callout-title">Producer/Consumer Independence</div>
+      <p>
+        Aside from <code>type</code>, all other frontmatter keys are optional. You can add custom keys (like <code>owner</code> or <code>status</code>). An agent reading this wiki (the consumer) must tolerate unknown types and keys gracefully, treating them as generic concepts.
+      </p>
+    </div>
+
+    <h2>Interactive Check</h2>
+    <p>Test your knowledge of the OKF folder structure and frontmatter specifications.</p>
+
+    <!-- Quiz 1 -->
+    <div class="quiz-container" id="quiz-1">
+      <div class="quiz-question">1. Which of the following filenames is explicitly reserved by the OKF specification and cannot be used for custom concept documents?</div>
+      <div class="quiz-options">
+        <button class="quiz-option" onclick="checkAnswer('quiz-1', 0, false)"><code>entry.md</code></button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-1', 1, false)"><code>table.md</code></button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-1', 2, true)"><code>index.md</code></button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-1', 3, false)"><code>draft.md</code></button>
+      </div>
+      <div class="quiz-feedback" id="feedback-1"></div>
+    </div>
+
+    <!-- Quiz 2 -->
+    <div class="quiz-container" id="quiz-2">
+      <div class="quiz-question">2. What is the Concept ID for a document stored at the file path <code>projects/my-website.md</code>?</div>
+      <div class="quiz-options">
+        <button class="quiz-option" onclick="checkAnswer('quiz-2', 0, false)"><code>projects/my-webs.md</code></button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-2', 1, false)"><code>project/my-website/</code></button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-2', 2, false)"><code>projects/mywebsite/</code></button>
+        <button class="quiz-option" onclick="checkAnswer('quiz-2', 3, true)"><code>projects/my-website</code></button>
+      </div>
+      <div class="quiz-feedback" id="feedback-2"></div>
+    </div>
+
+    <h2>Practical Exercise</h2>
+    <p>
+      To complete this lesson and unlock the next, let's create a real OKF Concept file! Open your editor and create a file at the root of your workspace named <code>projects/wiki-init.md</code> containing:
+    </p>
+    <pre><code>---
+type: project
+title: OKF Wiki Initialization
+description: Build a local external-memory wiki for personal and professional use.
+tags: [personal, study]
+timestamp: 2026-07-06T22:20:00Z
+---
+# Wiki Initialization
+We are setting up our personal OKF bundle...</code></pre>
+    <p>
+      Once you create that file, let me know, and I will verify it matches the specification!
+    </p>
+  </main>
+
+  <footer class="footer-nav">
+    <a href="./0001-what-is-okf.html">← Lesson 1: Intro</a>
+    <button class="lesson-action" onclick="alert('Make sure to create the wiki-init.md file to continue!')">Verify Exercise →</button>
+  </footer>
+
+  <script>
+    function checkAnswer(quizId, optionIndex, isCorrect) {
+      const quiz = document.getElementById(quizId);
+      const options = quiz.getElementsByClassName('quiz-option');
+      const feedback = quiz.querySelector('.quiz-feedback');
+      
+      // Reset classes
+      for (let btn of options) {
+        btn.classList.remove('correct', 'incorrect');
+      }
+      
+      if (isCorrect) {
+        options[optionIndex].classList.add('correct');
+        feedback.innerHTML = "<div class='feedback-loop-status'><span style='color: var(--success-color);'>✓ Correct!</span> Excellent.</div>";
+        feedback.style.display = 'block';
+      } else {
+        options[optionIndex].classList.add('incorrect');
+        feedback.innerHTML = "<div class='feedback-loop-status'><span style='color: var(--error-color);'>✗ Incorrect.</span> Check the reserved filenames and Concept ID rules above.</div>";
+        feedback.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

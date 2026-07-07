@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local OKF Wiki Graph</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-color: #cbd5e1;
+      --title-color: #f8fafc;
+      --border-color: #334155;
+      --accent: #38bdf8;
+    }
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    #graph-container {
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    #sidebar {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 320px;
+      max-height: calc(100vh - 40px);
+      background: rgba(30, 41, 59, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      overflow-y: auto;
+      pointer-events: auto;
+      z-index: 10;
+    }
+    h2 {
+      margin-top: 0;
+      color: var(--title-color);
+      font-size: 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+    }
+    .node-info {
+      margin-top: 15px;
+    }
+    .meta-tag {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .description {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .instruction {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 10px;
+      font-style: italic;
+    }
+  </style>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <div id="sidebar">
+    <h2>OKF Wiki Graph</h2>
+    <div id="info-content">
+      <p class="description">Hover or click a node in the graph to view its concept details and relationships.</p>
+    </div>
+    <div class="instruction">Scroll to zoom. Drag nodes to reposition.</div>
+  </div>
+  <svg id="graph-container"></svg>
+
+  <script>
+    const data = {
+      nodes: [
+  {
+    "id": "projects/agent-collab",
+    "type": "project",
+    "title": "Agent Collaboration Wiki",
+    "description": "Integrating automated agents to collaborate on the OKF knowledge base."
+  },
+  {
+    "id": "projects/wiki-init",
+    "type": "project",
+    "title": "OKF Wiki Initialization",
+    "description": "Build a local external-memory wiki for personal and professional use."
+  }
+],
+      links: [
+  {
+    "source": "projects/agent-collab",
+    "target": "projects/wiki-init",
+    "label": "Initial Wiki Project"
+  }
+]
+    };
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    const svg = d3.select("#graph-container")
+      .attr("viewBox", [0, 0, width, height]);
+
+    const g = svg.append("g");
+
+    // Add zoom behavior
+    svg.call(d3.zoom()
+      .extent([[0, 0], [width, height]])
+      .scaleExtent([0.1, 4])
+      .on("zoom", (event) => {
+        g.attr("transform", event.transform);
+      }));
+
+    // Color scale for concept types
+    const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+    const simulation = d3.forceSimulation(data.nodes)
+      .force("link", d3.forceLink(data.links).id(d => d.id).distance(150))
+      .force("charge", d3.forceManyBody().strength(-300))
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("collision", d3.forceCollide().radius(60));
+
+    // Draw links
+    const link = g.append("g")
+      .attr("stroke", "#475569")
+      .attr("stroke-opacity", 0.6)
+      .attr("stroke-width", 2)
+      .selectAll("line")
+      .data(data.links)
+      .join("line");
+
+    // Draw nodes
+    const node = g.append("g")
+      .selectAll("g")
+      .data(data.nodes)
+      .join("g")
+      .call(drag(simulation))
+      .on("mouseover", showInfo)
+      .on("click", showInfo);
+
+    node.append("circle")
+      .attr("r", 12)
+      .attr("fill", d => colorScale(d.type))
+      .attr("stroke", "#f8fafc")
+      .attr("stroke-width", 2);
+
+    node.append("text")
+      .attr("x", 16)
+      .attr("y", 4)
+      .text(d => d.title)
+      .attr("fill", "#cbd5e1")
+      .style("font-size", "12px")
+      .style("font-weight", "500")
+      .style("pointer-events", "none");
+
+    simulation.on("tick", () => {
+      link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+      node
+        .attr("transform", d => `translate(${d.x},${d.y})`);
+    });
+
+    function showInfo(event, d) {
+      const content = document.getElementById("info-content");
+      content.innerHTML = `
+        <div class="node-info">
+          <div class="meta-tag">${d.type}</div>
+          <h3 style="margin: 0 0 10px 0; color: #f8fafc;">${d.title}</h3>
+          <p style="font-family: monospace; font-size: 0.8rem; color: #38bdf8; margin: 0 0 10px 0;">ID: ${d.id}</p>
+          <p class="description">${d.description || 'No description provided.'}</p>
+        </div>
+      `;
+    }
+
+    function drag(simulation) {
+      function dragstarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+      }
+      
+      function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+      }
+      
+      function dragended(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+      }
+      
+      return d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended);
+    }
+  </script>
+</body>
+</html>
