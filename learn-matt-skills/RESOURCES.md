@@ -8,6 +8,9 @@ High-trust sources grounding this course. Never trust parametric knowledge over 
   - [README.md](https://github.com/mattpocock/skills/blob/main/README.md) — four failure modes, the user/model axis, full skill catalogue.
   - [setup-matt-pocock-skills/SKILL.md](https://github.com/mattpocock/skills/blob/main/skills/engineering/setup-matt-pocock-skills/SKILL.md) — the bootstrap skill + its 5 seed templates.
   - [writing-great-skills/SKILL.md](https://github.com/mattpocock/skills/blob/main/skills/productivity/writing-great-skills/SKILL.md) — how to author skills (for the "write your own" arm of the mission).
+  - [writing-fragments/SKILL.md](https://github.com/mattpocock/skills/blob/main/skills/in-progress/writing-fragments/SKILL.md) — explore mode: interview for raw noticings without imposing structure.
+  - [writing-beats/SKILL.md](https://github.com/mattpocock/skills/blob/main/skills/in-progress/writing-beats/SKILL.md) — exploit mode: assemble the pile as a choose-your-own journey of grounded beats.
+  - [writing-shape/SKILL.md](https://github.com/mattpocock/skills/blob/main/skills/in-progress/writing-shape/SKILL.md) — exploit mode: shape the pile into an argument block by block.
 - Local clone for exploration: `/tmp/mattpocock-skills` (shallow clone, re-clone if stale).
 
 ## Install / tooling

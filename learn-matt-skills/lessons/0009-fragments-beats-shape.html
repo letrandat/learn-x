@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 9 — fragments, beats, or shape?</title>
+<link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+
+<p class="eyebrow">Lesson 0009 · Writing workflow · Usage</p>
+<h1>Start with fragments. Then pick how you want to steer.</h1>
+<p class="dek">Fragments, beats, and shape aren't three steps you do in order. Fragments help you gather raw material. Beats and shape are two different ways to turn that material into a finished article — you pick one, not both.</p>
+
+<div class="diagram">                         EXPLORE
+                            │
+                            ▼
+                  ┌───────────────────┐
+                  │ writing-fragments │  widen the pile
+                  └─────────┬─────────┘
+                            │ raw-material.md
+              ┌─────────────┴─────────────┐
+              │          EXPLOIT          │
+              ▼                           ▼
+     ┌─────────────────┐         ┌─────────────────┐
+     │  writing-beats  │   OR    │  writing-shape  │
+     │ choose the next │         │ grow the draft  │
+     │ journey move    │         │ block by block  │
+     └─────────────────┘         └─────────────────┘</div>
+
+<div class="note">
+<span class="label">The rule worth remembering</span>
+Use <strong>fragments</strong> while you're still figuring out what you actually think. Once you feel like you have enough material, stop collecting and choose either <strong>beats</strong> or <strong>shape</strong> to write the article. Don't run both — each one is a complete path from raw material to finished draft.
+</div>
+
+<h2 id="fragments">1. <code>writing-fragments</code>: collect, don't organize</h2>
+<p>Think of this as a conversation that pulls interesting things out of your head: sharp sentences, claims, scenes, examples, complaints, half-formed thoughts, quotes, or clusters of related ideas. The best thing it can surface is a <strong>leading word</strong> — a single compact name or metaphor that could anchor the whole piece.</p>
+<p>The agent keeps asking questions and appends every useful fragment to a single Markdown file, separated by horizontal rules. There's no outline, no section headings, no attempt to make the file readable to anyone else yet. That deliberate messiness is the point — structure comes later.</p>
+
+<pre><code>$writing-fragments
+
+I want to explore why agent skills feel more reliable than giant prompts.
+Save fragments to writing/skills-reliability-fragments.md.</code></pre>
+
+<p>While you're in a session, you can say things like <code>cut the last one</code>, <code>rewrite that sharper</code>, or <code>merge those two</code>. Stop when the questions start circling back to things you've already said — not when you have an outline.</p>
+
+<h2 id="choice">2. Pick your writing mode</h2>
+<table>
+<thead><tr><th>Pick this</th><th>When your material wants</th><th>How it works</th></tr></thead>
+<tbody>
+<tr><td><code>writing-beats</code></td><td>A narrative with pivots, reveals, scenes, or multiple possible directions</td><td>The agent offers you 2–3 possible <strong>next beats</strong>; you pick one; it writes just that beat, then offers the next set of choices</td></tr>
+<tr><td><code>writing-shape</code></td><td>A coherent argument where paragraph order and formatting need to be carefully worked out</td><td>The agent offers 2–3 possible openings; then asks what the reader needs to hear next, growing the draft one block at a time</td></tr>
+</tbody>
+</table>
+
+<p><strong>A simple rule of thumb:</strong> use <code>shape</code> when you're writing a technical explainer or building an argument. Use <code>beats</code> when the sequence of ideas and how the reader experiences them is the main challenge. Still not sure? Ask yourself: "Do I want to choose the next <em>move in a story</em>, or defend the next <em>paragraph in an argument</em>?"</p>
+
+<h2 id="grounding">Both modes share one constraint: grounding</h2>
+<p>Before either skill starts writing, you establish what your audience already knows — the <strong>prerequisites</strong>. After that, every new concept has to be introduced before any later section relies on it. That's grounding.</p>
+<p>For example, you can't use "context load" to explain something unless the reader either already knew that term coming in, or an earlier paragraph defined it. If the next thing you want to write depends on a concept the reader hasn't seen yet, you need to either write a paragraph that introduces it first, or add it to the prerequisites.</p>
+
+<div class="note">
+<span class="label">Why this matters</span>
+Your raw fragments are a quarry, not a script. Both skills are free to split, merge, rephrase, or skip fragments entirely. The article is done when its journey or argument is complete — not when every fragment has been used up.
+</div>
+
+<h2 id="invoke">How to invoke each skill</h2>
+
+<h3>Journey steering (beats)</h3>
+<pre><code>$writing-beats
+
+Use writing/skills-reliability-fragments.md as the raw pile.
+Save the article to writing/skills-reliability-beats.md.
+Audience: software engineers who use coding agents but do not author skills.</code></pre>
+
+<h3>Argument shaping</h3>
+<pre><code>$writing-shape
+
+Use writing/skills-reliability-fragments.md as read-only raw material.
+Save the article to writing/skills-reliability-draft.md.
+Audience: software engineers who use coding agents but do not author skills.</code></pre>
+
+<p>Including the raw-material path and save path up front means the skills won't need to ask you for setup details. During either session, feel free to edit the article file directly whenever you want — the agent re-reads it before each append and will preserve your changes.</p>
+
+<h2 id="check">Quick check: pick the right tool</h2>
+<div class="quiz" data-answer="0">
+  <p class="q">You have a topic, but you don't know your strongest claim yet.</p>
+  <button>Mine fragments without imposing structure</button>
+  <button>Choose beats along a reader journey</button>
+  <button>Grow paragraphs into a fixed argument</button>
+  <p class="explain" hidden>You're still figuring out what you think — that means you're in explore mode. Use writing-fragments and resist the urge to outline.</p>
+</div>
+<div class="quiz" data-answer="1">
+  <p class="q">You have rich material and want to choose among dramatic pivots.</p>
+  <button>Mine fragments without imposing structure</button>
+  <button>Choose beats along a reader journey</button>
+  <button>Grow paragraphs into a fixed argument</button>
+  <p class="explain" hidden>Multiple possible directions through the material means writing-beats — you pick one reachable beat at a time.</p>
+</div>
+<div class="quiz" data-answer="2">
+  <p class="q">You have rich material and want a rigorous technical explanation.</p>
+  <button>Mine fragments without imposing structure</button>
+  <button>Choose beats along a reader journey</button>
+  <button>Grow paragraphs into a fixed argument</button>
+  <p class="explain" hidden>Building an argument paragraph by paragraph with deliberate formatting points to writing-shape.</p>
+</div>
+
+<h2 id="practice">Try it yourself</h2>
+<p>Start with something small — don't use your most precious idea for a first run. Invoke <code>$writing-fragments</code> with a single sentence and a save path. Stay in exploration mode for at least ten questions. Then stop, and pick exactly one of the two writing skills using the rule above.</p>
+
+<div class="primary-source">
+<span class="label">Primary sources — the installed skills themselves</span>
+Read <a href="https://github.com/mattpocock/skills/blob/main/skills/in-progress/writing-fragments/SKILL.md">writing-fragments/SKILL.md</a>, then compare <a href="https://github.com/mattpocock/skills/blob/main/skills/in-progress/writing-beats/SKILL.md">writing-beats/SKILL.md</a> with <a href="https://github.com/mattpocock/skills/blob/main/skills/in-progress/writing-shape/SKILL.md">writing-shape/SKILL.md</a>. Focus on each file's <code>&lt;what-to-do&gt;</code> section — that's the behavioral contract.
+</div>
+
+<p class="ask-teacher">Ask me about any distinction that's unclear — or invoke <code>$writing-fragments</code> now with a topic and path, and I'll run the first live rep with you.</p>
+
+<div class="lesson-nav">
+  <a href="0008-predictability-and-the-two-loads.html">← Lesson 8: predictability</a>
+  <a href="../reference/glossary.html">Glossary →</a>
+</div>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

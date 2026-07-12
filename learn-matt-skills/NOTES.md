@@ -15,6 +15,7 @@ Working notes + Dat's teaching preferences.
 - Reuse assets first; only add a new component when a second lesson would duplicate it.
 - Reference docs (glossary) in `reference/`; keep glossary authoritative across lessons.
 - Quiz answers: equal length, no formatting tells (per teach skill).
+- Workspace confirmed by Dat: `/Users/dat/ws/repos/learn-x/learn-matt-skills`; unrelated to `dat.me`.
 
 ## TODO / threads
 
